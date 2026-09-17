@@ -1,5 +1,5 @@
 ﻿using System.IO;
-using System.Text.Json;
+using Newtonsoft.Json;
 
 namespace TTRPGhelper
 {
@@ -23,8 +23,7 @@ namespace TTRPGhelper
 
         public static void ExportCharacter(Character character, string filePath)
         {
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            string jsonString = JsonSerializer.Serialize(character, options);
+            string jsonString = JsonConvert.SerializeObject(character, Formatting.Indented);
             File.WriteAllText(filePath, jsonString);
         }
 
@@ -33,7 +32,7 @@ namespace TTRPGhelper
             if (File.Exists(filePath))
             {
                 string jsonString = File.ReadAllText(filePath);
-                return JsonSerializer.Deserialize<Character>(jsonString);
+                return JsonConvert.DeserializeObject<Character>(jsonString);
             }
             return null;
         }

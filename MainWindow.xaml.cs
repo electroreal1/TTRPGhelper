@@ -72,43 +72,62 @@ namespace TTRPGhelper
                 myCharacter.ImagePath = openFileDialog.FileName;
             }
         }
-
-
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-            DataService.SaveCharacter(myCharacter);
-            MessageBox.Show("Character auto-saved to default location!");
+            try
+            {
+                DataService.SaveCharacter(myCharacter);
+                MessageBox.Show("Character auto-saved to default location!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show($"Failed to quick save:\n{ex.Message}", "Save Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void Import_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "JSON Files|*.json";
-
-            if (openFileDialog.ShowDialog() == true)
+            try
             {
-                var importedChar = DataService.ImportCharacter(openFileDialog.FileName);
-                if (importedChar != null)
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.Filter = "JSON Files|*.json";
+
+                if (openFileDialog.ShowDialog() == true)
                 {
-                    myCharacter = importedChar;
-                    this.DataContext = null;
-                    this.DataContext = myCharacter;
-                    MessageBox.Show("Character imported successfully!");
+                    var importedChar = DataService.ImportCharacter(openFileDialog.FileName);
+                    if (importedChar != null)
+                    {
+                        myCharacter = importedChar;
+                        this.DataContext = null;
+                        this.DataContext = myCharacter;
+                        MessageBox.Show("Character imported successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
                 }
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show($"Failed to import character:\n{ex.Message}", "Import Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private void Export_Click(object sender, RoutedEventArgs e)
         {
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "JSON Files|*.json";
-
-            saveFileDialog.FileName = string.IsNullOrWhiteSpace(myCharacter.Name) ? "NewCharacter" : myCharacter.Name;
-
-            if (saveFileDialog.ShowDialog() == true)
+            try
             {
-                DataService.ExportCharacter(myCharacter, saveFileDialog.FileName);
-                MessageBox.Show("Character exported successfully!");
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
+                saveFileDialog.Filter = "JSON Files|*.json";
+
+                saveFileDialog.FileName = string.IsNullOrWhiteSpace(myCharacter.Name) ? "NewCharacter" : myCharacter.Name;
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    DataService.ExportCharacter(myCharacter, saveFileDialog.FileName);
+                    MessageBox.Show("Character exported successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show($"Failed to export character:\n{ex.Message}", "Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }

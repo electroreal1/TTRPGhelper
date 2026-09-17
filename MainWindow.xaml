@@ -25,6 +25,7 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontSize" Value="14"/>
         </Style>
+
         <Style TargetType="Label">
             <Setter Property="Foreground" Value="{DynamicResource AppForeground}"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -39,6 +40,28 @@
             <Setter Property="Foreground" Value="{DynamicResource AppForeground}"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0,0,0,3"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border Name="Border" Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6,6,0,0">
+                            <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" HorizontalAlignment="Center" ContentSource="Header"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource CardBackground}"/>
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource AccentColor}"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="False">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="Transparent"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource CardBorder}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Window.Resources>
 
@@ -55,9 +78,10 @@
                 <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="160" Margin="0,0,15,0" FontWeight="Bold"/>
 
                 <Label Content="Pathway:" Margin="0,0,5,0"/>
-                <ComboBox SelectedItem="{Binding SelectedPathway}" Width="100" VerticalContentAlignment="Center" Margin="0,0,10,0" Padding="5,2" FontSize="14">
+                <ComboBox SelectedItem="{Binding SelectedPathway}" Width="135" VerticalContentAlignment="Center" Margin="0,0,10,0" Padding="5,2" FontSize="14">
                     <System:String xmlns:System="clr-namespace:System;assembly=mscorlib">Darkness</System:String>
                     <System:String xmlns:System="clr-namespace:System;assembly=mscorlib">Death</System:String>
+                    <System:String xmlns:System="clr-namespace:System;assembly=mscorlib">Twilight Giant</System:String>
                 </ComboBox>
 
                 <Label Content="Sequence:" Margin="0,0,5,0"/>
@@ -77,8 +101,8 @@
                         </Style>
                     </Button.Resources>
                 </Button>
-                             
-                <CheckBox Content="Dark Mode" VerticalAlignment="Center" Margin="25,0,0,0" Checked="DarkMode_Checked" Unchecked="DarkMode_Unchecked" FontWeight="Bold" FontSize="14"/>
+
+                <CheckBox Content="Dark Mode" VerticalAlignment="Center" Margin="15,0,0,0" Checked="DarkMode_Checked" Unchecked="DarkMode_Unchecked" FontWeight="Bold" FontSize="14"/>
             </StackPanel>
         </Border>
 
@@ -103,33 +127,33 @@
 
                                 <WrapPanel>
                                     <StackPanel Orientation="Horizontal" Margin="5,5,15,5">
-                                        <Label Content="HP:" Width="95"/>
+                                        <Label Content="HP:" Width="115"/>
                                         <TextBox Text="{Binding CurrentHP, UpdateSourceTrigger=PropertyChanged}" Width="50" HorizontalContentAlignment="Center"/>
                                         <Label Content="/" Padding="5,0"/>
                                         <TextBox Text="{Binding MaxHP, UpdateSourceTrigger=PropertyChanged}" Width="50" HorizontalContentAlignment="Center"/>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal" Margin="5,5,15,5">
-                                        <Label Content="SHP:" Width="95"/>
+                                        <Label Content="SHP:" Width="115"/>
                                         <TextBox Text="{Binding CurrentSHP, UpdateSourceTrigger=PropertyChanged}" Width="50" HorizontalContentAlignment="Center"/>
                                         <Label Content="/" Padding="5,0"/>
                                         <TextBox Text="{Binding MaxSHP, UpdateSourceTrigger=PropertyChanged}" Width="50" HorizontalContentAlignment="Center"/>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal" Margin="5,5,15,5">
-                                        <Label Content="Spirituality:" Width="95"/>
+                                        <Label Content="Spirituality:" Width="115"/>
                                         <TextBox Text="{Binding CurrentSpirituality, UpdateSourceTrigger=PropertyChanged}" Width="50" HorizontalContentAlignment="Center"/>
                                         <Label Content="/" Padding="5,0"/>
                                         <TextBox Text="{Binding MaxSpirituality, UpdateSourceTrigger=PropertyChanged}" Width="50" HorizontalContentAlignment="Center"/>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal" Margin="5,5,15,5">
-                                        <Label Content="Armor (AC):" Width="95"/>
+                                        <Label Content="Armor (AC):" Width="115"/>
                                         <TextBox Text="{Binding AC, UpdateSourceTrigger=PropertyChanged}" Width="50" HorizontalContentAlignment="Center"/>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal" Margin="5,5,15,5">
-                                        <Label Content="Movement:" Width="95"/>
+                                        <Label Content="Movement:" Width="115"/>
                                         <TextBox Text="{Binding Movement, UpdateSourceTrigger=PropertyChanged}" Width="50" HorizontalContentAlignment="Center"/>
                                     </StackPanel>
                                 </WrapPanel>
@@ -140,7 +164,7 @@
                                 <Border BorderBrush="{DynamicResource CardBorder}" BorderThickness="2" Width="130" Height="130" CornerRadius="8" Background="{DynamicResource AppBackground}" ClipToBounds="True">
                                     <Image Source="{Binding ImagePath}" Stretch="UniformToFill"/>
                                 </Border>
-                                <Button Content="Upload Image" Click="UploadImage_Click" Margin="0,15,0,0" Padding="15,6" Background="Transparent" BorderBrush="{DynamicResource CardBorder}"/>
+                                <Button Content="Upload Image" Click="UploadImage_Click" Margin="0,15,0,0" Padding="15,6" Background="Transparent" BorderBrush="{DynamicResource CardBorder}" Foreground="{DynamicResource AppForeground}"/>
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -152,7 +176,7 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Row="0" Text="Active Pathway Abilities" FontSize="18" FontWeight="Bold" Margin="5,0,0,15" Foreground="{DynamicResource AccentColor}"/>
+                            <TextBlock Grid.Row="0" Text="Pathway Abilities" FontSize="18" FontWeight="Bold" Margin="5,0,0,15" Foreground="{DynamicResource AccentColor}"/>
 
                             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,-10,0" Padding="0,0,10,0">
                                 <ItemsControl ItemsSource="{Binding ActiveAbilities}">
@@ -186,28 +210,38 @@
 
                             <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
                                 <Label Content="Strength XP:" Width="110"/>
-                                <TextBox Text="{Binding StrengthXP, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
-                                <TextBlock Text="{Binding StrLevel, StringFormat='{} (Lvl {0})'}" VerticalAlignment="Center" Margin="15,0,0,0" FontWeight="Bold"/>
+                                <TextBox Text="{Binding StrengthXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
+                                <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
+                                <TextBox Text="{Binding StrMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
+                                <TextBlock Text="{Binding TotalStrength, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
                                 <Label Content="Dexterity XP:" Width="110"/>
-                                <TextBox Text="{Binding DexterityXP, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
-                                <TextBlock Text="{Binding DexLevel, StringFormat='{} (Lvl {0})'}" VerticalAlignment="Center" Margin="15,0,0,0" FontWeight="Bold"/>
+                                <TextBox Text="{Binding DexterityXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
+                                <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
+                                <TextBox Text="{Binding DexMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
+                                <TextBlock Text="{Binding TotalDexterity, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
                                 <Label Content="Constit. XP:" Width="110"/>
-                                <TextBox Text="{Binding ConstitutionXP, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
-                                <TextBlock Text="{Binding ConLevel, StringFormat='{} (Lvl {0})'}" VerticalAlignment="Center" Margin="15,0,0,0" FontWeight="Bold"/>
+                                <TextBox Text="{Binding ConstitutionXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
+                                <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
+                                <TextBox Text="{Binding ConMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
+                                <TextBlock Text="{Binding TotalConstitution, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
                                 <Label Content="Exercise XP:" Width="110"/>
-                                <TextBox Text="{Binding ExerciseXP, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
-                                <TextBlock Text="{Binding ExerciseLevel, StringFormat='{} (Lvl {0})'}" VerticalAlignment="Center" Margin="15,0,0,0" FontWeight="Bold"/>
+                                <TextBox Text="{Binding ExerciseXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
+                                <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
+                                <TextBox Text="{Binding ExerciseMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
+                                <TextBlock Text="{Binding TotalExercise, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
                                 <Label Content="Move XP:" Width="110"/>
-                                <TextBox Text="{Binding MovementXP, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
-                                <TextBlock Text="{Binding MoveLevel, StringFormat='{} (Lvl {0})'}" VerticalAlignment="Center" Margin="15,0,0,0" FontWeight="Bold"/>
+                                <TextBox Text="{Binding MovementXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
+                                <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
+                                <TextBox Text="{Binding MoveMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
+                                <TextBlock Text="{Binding TotalMovement, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
                             </StackPanel>
                         </StackPanel>
 
@@ -215,24 +249,39 @@
                             <TextBlock Text="Pathway Stats" FontSize="18" FontWeight="Bold" Margin="0,0,0,20" Foreground="{DynamicResource AccentColor}"/>
 
                             <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
-                                <Label Content="Secrecy XP:" Width="110"/>
-                                <TextBox Text="{Binding SecrecyXP, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
-                                <TextBlock Text="{Binding TotalSecrecy, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="15,0,0,0" FontWeight="Bold"/>
+                                <Label Content="Melee XP:" Width="145"/>
+                                <TextBox Text="{Binding MeleeXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
+                                <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
+                                <TextBox Text="{Binding MeleeMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
+                                <TextBlock Text="{Binding TotalMelee, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
-                                <Label Content="Speech XP:" Width="110"/>
-                                <TextBox Text="{Binding SpeechXP, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
-                                <TextBlock Text="{Binding TotalSpeech, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="15,0,0,0" FontWeight="Bold"/>
+                                <Label Content="Secrecy XP:" Width="145"/>
+                                <TextBox Text="{Binding SecrecyXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
+                                <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
+                                <TextBox Text="{Binding SecrecyMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
+                                <TextBlock Text="{Binding TotalSecrecy, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
-                                <Label Content="Autopsy XP:" Width="110"/>
-                                <TextBox Text="{Binding AutopsyXP, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
-                                <TextBlock Text="{Binding TotalAutopsy, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="15,0,0,0" FontWeight="Bold"/>
+                                <Label Content="Speech XP:" Width="145"/>
+                                <TextBox Text="{Binding SpeechXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
+                                <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
+                                <TextBox Text="{Binding SpeechMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
+                                <TextBlock Text="{Binding TotalSpeech, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
-                                <Label Content="Intimidate XP:" Width="110"/>
-                                <TextBox Text="{Binding IntimidationXP, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
-                                <TextBlock Text="{Binding TotalIntimidation, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="15,0,0,0" FontWeight="Bold"/>
+                                <Label Content="Autopsy XP:" Width="145"/>
+                                <TextBox Text="{Binding AutopsyXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
+                                <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
+                                <TextBox Text="{Binding AutopsyMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
+                                <TextBlock Text="{Binding TotalAutopsy, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
+                                <Label Content="Intimidate XP:" Width="145"/>
+                                <TextBox Text="{Binding IntimidationXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
+                                <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
+                                <TextBox Text="{Binding IntimidationMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
+                                <TextBlock Text="{Binding TotalIntimidation, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
                             </StackPanel>
                         </StackPanel>
                     </Grid>
@@ -270,17 +319,50 @@
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Session Notes">
-                <Border Background="{DynamicResource CardBackground}" CornerRadius="10" Padding="20" Margin="0,10,0,0" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" Text="Scratchpad &amp; Inventory" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" Foreground="{DynamicResource AccentColor}"/>
-                        <TextBox Grid.Row="1" Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" AcceptsReturn="True" VerticalContentAlignment="Top" Padding="15" FontSize="16"/>
-                    </Grid>
-                </Border>
+            <TabItem Header="Session Notes &amp; Inventory">
+                <Grid Margin="0,10,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Row="0" Grid.ColumnSpan="2" Background="{DynamicResource CardBackground}" CornerRadius="10" Padding="20" Margin="0,0,0,15" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="Honorific Names" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" Foreground="{DynamicResource AccentColor}"/>
+                            <TextBox Grid.Row="1" Text="{Binding HonorificName, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" VerticalContentAlignment="Top" Padding="15" FontSize="16" Height="110"/>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Row="1" Grid.Column="0" Background="{DynamicResource CardBackground}" CornerRadius="10" Padding="20" Margin="0,0,10,0" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="Inventory &amp; Items" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" Foreground="{DynamicResource AccentColor}"/>
+                            <TextBox Grid.Row="1" Text="{Binding Inventory, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" AcceptsReturn="True" VerticalContentAlignment="Top" Padding="15" FontSize="16"/>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Row="1" Grid.Column="1" Background="{DynamicResource CardBackground}" CornerRadius="10" Padding="20" Margin="10,0,0,0" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="Session Notes &amp; Scratchpad" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" Foreground="{DynamicResource AccentColor}"/>
+                            <TextBox Grid.Row="1" Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" AcceptsReturn="True" VerticalContentAlignment="Top" Padding="15" FontSize="16"/>
+                        </Grid>
+                    </Border>
+                </Grid>
             </TabItem>
 
         </TabControl>
