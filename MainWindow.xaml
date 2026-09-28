@@ -4,8 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TTRPGhelper"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         mc:Ignorable="d"
-        Title="TTRPG Helper" Height="800" Width="1050"
+        Title="TTRPG Helper" Height="800" Width="1050" 
         Background="{DynamicResource AppBackground}"
         FontFamily="Cascadia Code">
 
@@ -15,6 +17,71 @@
         <SolidColorBrush x:Key="CardBackground" Color="#FFFFFF"/>
         <SolidColorBrush x:Key="CardBorder" Color="#E4E6EB"/>
         <SolidColorBrush x:Key="AccentColor" Color="#1877F2"/>
+        <SolidColorBrush x:Key="AbilityBackground" Color="#F9F9F9"/>
+        <SolidColorBrush x:Key="AbilityTitle" Color="#2C3E50"/>
+
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{DynamicResource AppForeground}"/>
+        </Style>
+
+        <Style TargetType="ComboBox">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CardBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton ClickMode="Press" Focusable="false" IsChecked="{Binding Path=IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="4">
+                                            <Path Data="M 0 0 L 4 4 L 8 0 Z" Fill="Black" HorizontalAlignment="Right" Margin="0,0,10,0" VerticalAlignment="Center" x:Name="Arrow"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <ContentPresenter Content="{TemplateBinding SelectionBoxItem}" 
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" 
+                                              ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" 
+                                              TextElement.Foreground="{TemplateBinding Foreground}"
+                                              HorizontalAlignment="Left" IsHitTestVisible="False" Margin="10,3,30,3" VerticalAlignment="Center" x:Name="ContentSite"/>
+                            <TextBox IsReadOnly="{TemplateBinding IsReadOnly}" Visibility="Hidden" x:Name="PART_EditableTextBox"/>
+                            <Popup AllowsTransparency="True" Focusable="False" IsOpen="{TemplateBinding IsDropDownOpen}" Placement="Bottom" PopupAnimation="Slide" x:Name="Popup">
+                                <Grid MaxHeight="{TemplateBinding MaxDropDownHeight}" MinWidth="{TemplateBinding ActualWidth}" SnapsToDevicePixels="True" x:Name="DropDown" TextElement.Foreground="Black">
+                                    <Border Background="White" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1" x:Name="DropDownBorder"/>
+                                    <ScrollViewer Margin="0" SnapsToDevicePixels="True">
+                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                    </ScrollViewer>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border Background="{TemplateBinding Background}" Name="Border" Padding="{TemplateBinding Padding}" TextElement.Foreground="{TemplateBinding Foreground}">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="true">
+                                <Setter Property="Background" TargetName="Border" Value="{DynamicResource AccentColor}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
         <Style TargetType="TextBox">
             <Setter Property="Padding" Value="5,3"/>
@@ -31,6 +98,10 @@
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="FontSize" Value="14"/>
+        </Style>
+
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource AppForeground}"/>
         </Style>
 
         <Style TargetType="TabItem">
@@ -78,22 +149,50 @@
                 <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="160" Margin="0,0,15,0" FontWeight="Bold"/>
 
                 <Label Content="Pathway:" Margin="0,0,5,0"/>
-                <ComboBox SelectedItem="{Binding SelectedPathway}" Width="135" VerticalContentAlignment="Center" Margin="0,0,10,0" Padding="5,2" FontSize="14">
-                    <System:String xmlns:System="clr-namespace:System;assembly=mscorlib">Darkness</System:String>
-                    <System:String xmlns:System="clr-namespace:System;assembly=mscorlib">Death</System:String>
-                    <System:String xmlns:System="clr-namespace:System;assembly=mscorlib">Twilight Giant</System:String>
+                <ComboBox SelectedItem="{Binding SelectedPathway}" Width="135" VerticalContentAlignment="Center" Margin="0,0,10,0" Padding="5,2" FontSize="14" Foreground="Black">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" Foreground="Black" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                    <sys:String>Darkness</sys:String>
+                    <sys:String>Death</sys:String>
+                    <sys:String>Twilight Giant</sys:String>
+                    <sys:String>Moon</sys:String>
+                    <sys:String>Mother</sys:String>
+                    <sys:String>Justiciar</sys:String>
+                    <sys:String>Black Emperor</sys:String>
+                    <sys:String>Door</sys:String>
+                    <sys:String>Error</sys:String>
+                    <sys:String>Fool</sys:String>
+                    <sys:String>Abyss</sys:String>
+                    <sys:String>Chained</sys:String>
+                    <sys:String>Hermit</sys:String>
+                    <sys:String>Paragon</sys:String>
+                    <sys:String>Red Priest</sys:String>
+                    <sys:String>Demoness</sys:String>
+                    <sys:String>Hanged Man</sys:String>
+                    <sys:String>Tyrant</sys:String>
+                    <sys:String>Sun</sys:String>
+                    <sys:String>Visionary</sys:String>
+                    <sys:String>White Tower</sys:String>
+                    <sys:String>Wheel of Fortune</sys:String>
                 </ComboBox>
-
                 <Label Content="Sequence:" Margin="0,0,5,0"/>
-                <ComboBox SelectedItem="{Binding CurrentSequence}" Width="50" VerticalContentAlignment="Center" Margin="0,0,15,0" Padding="5,2" FontSize="14">
-                    <System:Int32 xmlns:System="clr-namespace:System;assembly=mscorlib">9</System:Int32>
-                    <System:Int32 xmlns:System="clr-namespace:System;assembly=mscorlib">8</System:Int32>
-                    <System:Int32 xmlns:System="clr-namespace:System;assembly=mscorlib">7</System:Int32>
-                    <System:Int32 xmlns:System="clr-namespace:System;assembly=mscorlib">6</System:Int32>
-                    <System:Int32 xmlns:System="clr-namespace:System;assembly=mscorlib">5</System:Int32>
-                    <System:Int32 xmlns:System="clr-namespace:System;assembly=mscorlib">4</System:Int32>
+                <ComboBox SelectedItem="{Binding CurrentSequence}" Width="50" VerticalContentAlignment="Center" Margin="0,0,15,0" Padding="5,2" FontSize="14" Foreground="Black">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" Foreground="Black" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                    <sys:Int32>9</sys:Int32>
+                    <sys:Int32>8</sys:Int32>
+                    <sys:Int32>7</sys:Int32>
+                    <sys:Int32>6</sys:Int32>
+                    <sys:Int32>5</sys:Int32>
+                    <sys:Int32>4</sys:Int32>
                 </ComboBox>
-
+                
                 <Button Content="Apply Stats" Click="applyPathway_Click" Padding="15,5" FontWeight="Bold" FontSize="14" Background="{DynamicResource AccentColor}" Foreground="White" BorderThickness="0">
                     <Button.Resources>
                         <Style TargetType="Border">
@@ -142,9 +241,9 @@
 
                                     <StackPanel Orientation="Horizontal" Margin="5,5,15,5">
                                         <Label Content="Spirituality:" Width="115"/>
-                                        <TextBox Text="{Binding CurrentSpirituality, UpdateSourceTrigger=PropertyChanged}" Width="50" HorizontalContentAlignment="Center"/>
+                                        <TextBox Text="{Binding DisplayCurrentSpirituality, Mode=OneWay}" Width="50" HorizontalContentAlignment="Center"/>
                                         <Label Content="/" Padding="5,0"/>
-                                        <TextBox Text="{Binding MaxSpirituality, UpdateSourceTrigger=PropertyChanged}" Width="50" HorizontalContentAlignment="Center"/>
+                                        <TextBox Text="{Binding DisplayMaxSpirituality, Mode=OneWay}" Width="50" HorizontalContentAlignment="Center"/>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal" Margin="5,5,15,5">
@@ -155,6 +254,21 @@
                                     <StackPanel Orientation="Horizontal" Margin="5,5,15,5">
                                         <Label Content="Movement:" Width="115"/>
                                         <TextBox Text="{Binding Movement, UpdateSourceTrigger=PropertyChanged}" Width="50" HorizontalContentAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" Margin="5,5,15,5">
+                                        <Label Content="Healing:" Width="115"/>
+                                        <TextBox Text="{Binding Healing, UpdateSourceTrigger=PropertyChanged}" Width="50" HorizontalContentAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" Margin="5,5,15,5">
+                                        <Label Content="Instant Actions:" Width="140"/>
+                                        <TextBox Text="{Binding InstantActions, UpdateSourceTrigger=PropertyChanged}" Width="50" HorizontalContentAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" Margin="5,5,15,5">
+                                        <Label Content="To Hit:" Width="70"/>
+                                        <TextBox Text="{Binding ToHit, UpdateSourceTrigger=PropertyChanged}" Width="50" HorizontalContentAlignment="Center"/>
                                     </StackPanel>
                                 </WrapPanel>
                             </StackPanel>
@@ -182,9 +296,9 @@
                                 <ItemsControl ItemsSource="{Binding ActiveAbilities}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border Background="{DynamicResource AppBackground}" CornerRadius="6" Padding="15" Margin="0,0,0,12" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1">
+                                            <Border Background="{DynamicResource AbilityBackground}" CornerRadius="6" Padding="15" Margin="0,0,0,12" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1">
                                                 <StackPanel>
-                                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource AccentColor}" Margin="0,0,0,5"/>
+                                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource AbilityTitle}" Margin="0,0,0,5"/>
                                                     <TextBlock Text="{Binding Description}" TextWrapping="Wrap" FontSize="14" LineHeight="20"/>
                                                 </StackPanel>
                                             </Border>
@@ -198,94 +312,94 @@
             </TabItem>
 
             <TabItem Header="Training &amp; Stats">
-                <Border Background="{DynamicResource CardBackground}" CornerRadius="10" Padding="20" Margin="0,10,0,0" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,10,-10,0" Padding="0,0,10,0">
+                    <Border Background="{DynamicResource CardBackground}" CornerRadius="10" Padding="20" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                            <TextBlock Text="Physical &amp; Core XP" FontSize="18" FontWeight="Bold" Margin="0,0,0,20" Foreground="{DynamicResource AccentColor}"/>
+                            <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                <TextBlock Text="Physical &amp; Core XP" FontSize="18" FontWeight="Bold" Margin="0,0,0,20" Foreground="{DynamicResource AccentColor}"/>
 
-                            <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
-                                <Label Content="Strength XP:" Width="110"/>
-                                <TextBox Text="{Binding StrengthXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
-                                <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
-                                <TextBox Text="{Binding StrMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
-                                <TextBlock Text="{Binding TotalStrength, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
+                                <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
+                                    <Label Content="Strength XP:" Width="110"/>
+                                    <TextBox Text="{Binding StrengthXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
+                                    <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
+                                    <TextBox Text="{Binding StrMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
+                                    <TextBlock Text="{Binding TotalStrength, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
+                                    <Label Content="Dexterity XP:" Width="110"/>
+                                    <TextBox Text="{Binding DexterityXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
+                                    <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
+                                    <TextBox Text="{Binding DexMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
+                                    <TextBlock Text="{Binding TotalDexterity, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
+                                    <Label Content="Constit. XP:" Width="110"/>
+                                    <TextBox Text="{Binding ConstitutionXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
+                                    <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
+                                    <TextBox Text="{Binding ConMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
+                                    <TextBlock Text="{Binding TotalConstitution, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
+                                    <Label Content="Exercise XP:" Width="110"/>
+                                    <TextBox Text="{Binding ExerciseXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
+                                    <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
+                                    <TextBox Text="{Binding ExerciseMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
+                                    <TextBlock Text="{Binding TotalExercise, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
+                                    <Label Content="Movement XP:" Width="110"/>
+                                    <TextBox Text="{Binding MovementXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
+                                    <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
+                                    <TextBox Text="{Binding MovementMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
+                                    <TextBlock Text="{Binding TotalMovementXP, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
+                                    <Label Content="Stealth XP:" Width="110"/>
+                                    <TextBox Text="{Binding StealthXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
+                                    <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
+                                    <TextBox Text="{Binding StealthMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
+                                    <TextBlock Text="{Binding TotalStealth, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
+                                </StackPanel>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
-                                <Label Content="Dexterity XP:" Width="110"/>
-                                <TextBox Text="{Binding DexterityXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
-                                <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
-                                <TextBox Text="{Binding DexMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
-                                <TextBlock Text="{Binding TotalDexterity, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
-                                <Label Content="Constit. XP:" Width="110"/>
-                                <TextBox Text="{Binding ConstitutionXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
-                                <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
-                                <TextBox Text="{Binding ConMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
-                                <TextBlock Text="{Binding TotalConstitution, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
-                                <Label Content="Exercise XP:" Width="110"/>
-                                <TextBox Text="{Binding ExerciseXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
-                                <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
-                                <TextBox Text="{Binding ExerciseMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
-                                <TextBlock Text="{Binding TotalExercise, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
-                                <Label Content="Move XP:" Width="110"/>
-                                <TextBox Text="{Binding MovementXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
-                                <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
-                                <TextBox Text="{Binding MoveMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
-                                <TextBlock Text="{Binding TotalMovement, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
-                            </StackPanel>
-                        </StackPanel>
 
-                        <StackPanel Grid.Column="1" Margin="10,0,0,0">
-                            <TextBlock Text="Pathway Stats" FontSize="18" FontWeight="Bold" Margin="0,0,0,20" Foreground="{DynamicResource AccentColor}"/>
+                            <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                <StackPanel.Resources>
+                                    <CollectionViewSource x:Key="SortedPathwayStats" Source="{Binding PathwayStatList}" IsLiveSortingRequested="True">
+                                        <CollectionViewSource.LiveSortingProperties>
+                                            <sys:String>Total</sys:String>
+                                        </CollectionViewSource.LiveSortingProperties>
+                                        <CollectionViewSource.SortDescriptions>
+                                            <scm:SortDescription PropertyName="Total" Direction="Descending"/>
+                                            <scm:SortDescription PropertyName="Name" Direction="Ascending"/>
+                                        </CollectionViewSource.SortDescriptions>
+                                    </CollectionViewSource>
+                                </StackPanel.Resources>
 
-                            <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
-                                <Label Content="Melee XP:" Width="145"/>
-                                <TextBox Text="{Binding MeleeXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
-                                <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
-                                <TextBox Text="{Binding MeleeMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
-                                <TextBlock Text="{Binding TotalMelee, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
+                                <TextBlock Text="Pathway Stats" FontSize="18" FontWeight="Bold" Margin="0,0,0,20" Foreground="{DynamicResource AccentColor}"/>
+
+                                <ItemsControl ItemsSource="{Binding Source={StaticResource SortedPathwayStats}}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
+                                                <Label Content="{Binding Name}" Width="145"/>
+                                                <TextBox Text="{Binding XP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
+                                                <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
+                                                <TextBox Text="{Binding Mod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
+                                                <TextBlock Text="{Binding Total, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
-                                <Label Content="Secrecy XP:" Width="145"/>
-                                <TextBox Text="{Binding SecrecyXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
-                                <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
-                                <TextBox Text="{Binding SecrecyMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
-                                <TextBlock Text="{Binding TotalSecrecy, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
-                                <Label Content="Speech XP:" Width="145"/>
-                                <TextBox Text="{Binding SpeechXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
-                                <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
-                                <TextBox Text="{Binding SpeechMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
-                                <TextBlock Text="{Binding TotalSpeech, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
-                                <Label Content="Autopsy XP:" Width="145"/>
-                                <TextBox Text="{Binding AutopsyXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
-                                <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
-                                <TextBox Text="{Binding AutopsyMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
-                                <TextBlock Text="{Binding TotalAutopsy, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="5,5,15,10">
-                                <Label Content="Intimidate XP:" Width="145"/>
-                                <TextBox Text="{Binding IntimidationXP, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
-                                <Label Content="Mod:" Width="45" Margin="5,0,0,0"/>
-                                <TextBox Text="{Binding IntimidationMod, UpdateSourceTrigger=PropertyChanged}" Width="40"/>
-                                <TextBlock Text="{Binding TotalIntimidation, StringFormat='{} (Total {0})'}" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Grid>
-                </Border>
+
+                        </Grid>
+                    </Border>
+                </ScrollViewer>
             </TabItem>
 
             <TabItem Header="Backstory &amp; Traits">
@@ -319,7 +433,7 @@
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Session Notes &amp; Inventory">
+            <TabItem Header="Notes &amp; Inventory">
                 <Grid Margin="0,10,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -330,7 +444,7 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Border Grid.Row="0" Grid.ColumnSpan="2" Background="{DynamicResource CardBackground}" CornerRadius="10" Padding="20" Margin="0,0,0,15" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1">
+                    <Border Grid.Row="0" Grid.Column="0" Background="{DynamicResource CardBackground}" CornerRadius="10" Padding="20" Margin="0,0,10,15" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -341,13 +455,24 @@
                         </Grid>
                     </Border>
 
+                    <Border Grid.Row="0" Grid.Column="1" Background="{DynamicResource CardBackground}" CornerRadius="10" Padding="20" Margin="10,0,0,15" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="Tamed Animals" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" Foreground="{DynamicResource AccentColor}"/>
+                            <TextBox Grid.Row="1" Text="{Binding TamedAnimals, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" VerticalContentAlignment="Top" Padding="15" FontSize="16" Height="110"/>
+                        </Grid>
+                    </Border>
+
                     <Border Grid.Row="1" Grid.Column="0" Background="{DynamicResource CardBackground}" CornerRadius="10" Padding="20" Margin="0,0,10,0" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Text="Inventory &amp; Items" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" Foreground="{DynamicResource AccentColor}"/>
+                            <TextBlock Grid.Row="0" Text="Inventory" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" Foreground="{DynamicResource AccentColor}"/>
                             <TextBox Grid.Row="1" Text="{Binding Inventory, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" AcceptsReturn="True" VerticalContentAlignment="Top" Padding="15" FontSize="16"/>
                         </Grid>
                     </Border>
@@ -358,11 +483,168 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Text="Session Notes &amp; Scratchpad" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" Foreground="{DynamicResource AccentColor}"/>
+                            <TextBlock Grid.Row="0" Text="Notes" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" Foreground="{DynamicResource AccentColor}"/>
                             <TextBox Grid.Row="1" Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" AcceptsReturn="True" VerticalContentAlignment="Top" Padding="15" FontSize="16"/>
                         </Grid>
                     </Border>
                 </Grid>
+            </TabItem>
+
+            <TabItem Header="Rules">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,10,-10,0" Padding="0,0,10,0">
+                    <StackPanel>
+                        <Border Background="{DynamicResource CardBackground}" CornerRadius="6" Margin="0,0,0,12" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1">
+                            <Expander Padding="15" Foreground="{DynamicResource AppForeground}">
+                                <Expander.Header>
+                                    <TextBlock Text="Status Effects" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource AccentColor}"/>
+                                </Expander.Header>
+                                <TextBlock TextWrapping="Wrap" FontSize="14" LineHeight="22" Margin="0,10,0,0" Foreground="{DynamicResource AppForeground}">
+                                    <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Burning:"/> Deals Damage at start of targets turn equal to value. Lose half the stacks rounded down per turn.<LineBreak/><LineBreak/>
+                                    <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Bleeding:"/> Deals damage to the one inflicted upon taking any action. Lose half rounded down bleed per action taken.<LineBreak/><LineBreak/>
+                                    <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Charged:"/> Upon dealing dmg equal to the value to the target, after the status was applied, the target will take additional dmg equal to the value. Remove the value after.<LineBreak/><LineBreak/>
+                                    <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Freezing:"/> Reduce the target's movement equal to value. This also affects the initial initiative roll upon entering combat. Loose one stack per turn.<LineBreak/><LineBreak/>
+                                    <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Corrosion:"/> 3 Damage on impact.<LineBreak/><LineBreak/>
+                                    <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Black Flame:"/> A special form of burning that does not proc unless the beyonder wills it. Once it procs every stack of black flame is gone.<LineBreak/><LineBreak/>
+                                    <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Blooming:"/> Every Blooming on the target makes them more susceptible to staggering. At 10 blooming they will stagger every 3 turns. At 20 blooming every 2 turns.<LineBreak/><LineBreak/>
+                                    <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Trembling:"/> When the gets hit by certain skills activate them causing either debuffs or damage.<LineBreak/><LineBreak/>
+                                    <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Pinned:"/> Reduces movement to zero in combat (not counting initiative).
+                                </TextBlock>
+                            </Expander>
+                        </Border>
+
+                        <Border Background="{DynamicResource CardBackground}" CornerRadius="6" Margin="0,0,0,12" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1">
+                            <Expander Padding="15" Foreground="{DynamicResource AppForeground}">
+                                <Expander.Header>
+                                    <TextBlock Text="Normal Weapons (Damage &amp; Range)" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource AccentColor}"/>
+                                </Expander.Header>
+                                <ScrollViewer MaxHeight="300" VerticalScrollBarVisibility="Auto" Margin="0,10,0,0" Padding="0,0,10,0">
+                                    <TextBlock TextWrapping="Wrap" FontSize="14" LineHeight="22" Foreground="{DynamicResource AppForeground}">
+                                        <Run FontStyle="Italic" Text="(Note: Melee is the normal to hit gained from pathways, Throwing and Shooting require separate training)"/><LineBreak/><LineBreak/>
+                                        
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Fists:"/> 1d3 dmg (Melee) (1 Meter)<LineBreak/>
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Knife:"/> 1d5 dmg, inflicts 1 bleed (Melee/Throwing) (1 Meter / 15+Throwing Meters)<LineBreak/>
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Wooden Cane:"/> 1d4 dmg (Melee) (1-2 Meters)<LineBreak/>
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Iron/Gold Inlaid Cane:"/> 1d5 dmg (Melee) (1-2 Meters)<LineBreak/>
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Short Sword:"/> 1d6 dmg, inflicts 1 bleed (Melee) (1 Meter)<LineBreak/>
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Sword:"/> 1d7 dmg, inflicts 1 bleed (Melee) (1-2 Meters)<LineBreak/>
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Rock:"/> 1d4 dmg (Melee/Throwing) (1 Meter / 20+Throwing Meters)<LineBreak/>
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Bow:"/> Exists?<LineBreak/>
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Revolver:"/> 1d8 dmg, Holds 6 Bullets (Shooting) (40 Meters)<LineBreak/>
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Rifle:"/> 1d12 dmg, Holds 12 Bullets (Needs at least Strength Lvl 1). Firing without required stats takes 1 extra and deals 2d3 while standing / 1d2 and losing an extra while propped (Shooting) (100 Meters)<LineBreak/>
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Sniper:"/> 2d6+2 dmg, Holds 1 Bullet (Needs at least Strength and Dexterity Lvl 1; only Strength Lvl 1 when propping). Firing without required stats takes 1 extra and deals 2d3 while standing / 2d2 and losing an extra while propped (Shooting) (250 Meters)<LineBreak/>
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Steam Powered Machine Gun:"/> 3d6 dmg, 3 Attacks per Magazine (Shooting) (100 Meters)<LineBreak/>
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Spear:"/> 1d7 dmg (Melee/Throwing) (3 Meters / 20+Throwing Meters)<LineBreak/>
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Mace:"/> 1d8 dmg (Melee) (1 Meter)<LineBreak/>
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Great Hammer:"/> 1d10 dmg (Needs at least Strength Lvl 1), inflicts 3 freeze (Melee) (3 Meters)<LineBreak/>
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Great Sword:"/> 1d10 dmg (Needs at least Strength Lvl 1), inflicts 2 bleed (Melee) (3 Meters)<LineBreak/><LineBreak/>
+
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="[Mechanic] Propping (Extra Action):"/> Adds +3 to Shooting and -10 to Movement, requires an extra to get up. Propping only works with Rifles and Snipers.<LineBreak/>
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="[Mechanic] Reloading (Extra Action):"/> Reloading Revolvers, Rifles and Snipers takes one extra and reloads 3 (1 for Sniper) Bullets. Reloading a Steam Powered Machine Gun takes two extra and fully reloads the magazine.
+                                    </TextBlock>
+                                </ScrollViewer>
+                            </Expander>
+                        </Border>
+
+                        <Border Background="{DynamicResource CardBackground}" CornerRadius="6" Margin="0,0,0,12" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1">
+                            <Expander Padding="15" Foreground="{DynamicResource AppForeground}">
+                                <Expander.Header>
+                                    <TextBlock Text="Underwater Combat" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource AccentColor}"/>
+                                </Expander.Header>
+                                <ScrollViewer MaxHeight="300" VerticalScrollBarVisibility="Auto" Margin="0,10,0,0" Padding="0,0,10,0">
+                                    <TextBlock TextWrapping="Wrap" FontSize="14" LineHeight="22" Foreground="{DynamicResource AppForeground}">
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Underwater Breathing:"/> In combat, must go above water and take a breath every 5 turns (unless specified by pathway). Every turn after, they will take 10% of their max health in damage (goes through damage reduction abilities) and incur an additional -2 on all rolls for however many turns they’ve been underwater after the initial 5 turns.<LineBreak/><LineBreak/>
+                                        
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Underwater Movement:"/> All movement is halved (rounded down) while in the water. This applies to abilities that cause the user to travel in the water such as Flame Transformation.<LineBreak/><LineBreak/>
+                                        
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Fire:"/> All fire abilities will take an automatic -3 to damage when used underwater. If the damage is below 0, it will be snuffed out.<LineBreak/>
+                                        • For fire abilities that travel: an additional -1 to damage will occur for every 10 meters traveled.<LineBreak/>
+                                        • For lingering damage abilities: takes a -5 to damage every turn it’s active until its damage hits zero.<LineBreak/>
+                                        • For lingering non-damage abilities: user must expend 1 spirituality to keep it maintained, otherwise it will be deactivated at the start of their next turn.<LineBreak/>
+                                        • Fire stacks cannot be applied to the external body.<LineBreak/><LineBreak/>
+                                        
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="General Projectile Rules:"/> Projectiles such as bullets or arrows and thrown weapons like knives or daggers will take a -2 to hit and a -1 to damage for every 15 meters traveled. For abilities similar to shot or thrown projectiles, such as a fool’s air bullets, they will take a -1 to hit and a -1 to damage for every 20 meters.
+                                    </TextBlock>
+                                </ScrollViewer>
+                            </Expander>
+                        </Border>
+
+                        <Border Background="{DynamicResource CardBackground}" CornerRadius="6" Margin="0,0,0,12" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1">
+                            <Expander Padding="15" Foreground="{DynamicResource AppForeground}">
+                                <Expander.Header>
+                                    <TextBlock Text="Stealth" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource AccentColor}"/>
+                                </Expander.Header>
+                                <ScrollViewer MaxHeight="300" VerticalScrollBarVisibility="Auto" Margin="0,10,0,0" Padding="0,0,10,0">
+                                    <TextBlock TextWrapping="Wrap" FontSize="14" LineHeight="22" Foreground="{DynamicResource AppForeground}">
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Stealth Roll:"/> 10 + Seq + Stealth<LineBreak/>
+                                        Stealth cannot be directly given by a pathway’s stats, but can be trained and increased with certain abilities.<LineBreak/><LineBreak/>
+
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Perception Roll:"/> 10 + Seq + Perception<LineBreak/>
+                                        Can additionally be substituted with any ability that increases senses/observational skills.<LineBreak/><LineBreak/>
+
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Out of Combat:"/><LineBreak/>
+                                        • If stealth roll is below the average perception of a nearby player or NPC, you can be seen through.<LineBreak/>
+                                        • DMs can, at any point if they see fit, have NPCs or other players roll to see hidden entities.<LineBreak/>
+                                        • If seen shortly before attempting stealth, roll with disadvantage.<LineBreak/><LineBreak/>
+
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="In Combat:"/><LineBreak/>
+                                        • Stealth requires a Main Action to be performed unless a supplementary ability is used such as concealment or invisibility.<LineBreak/>
+                                        • Abilities that make stealth into an Extra Action will state it explicitly.<LineBreak/>
+                                        • Will have to be rolled each turn, consuming a Main Action or Extra Action if using an ability.<LineBreak/>
+                                        • When using movement or any visually distinct ability while in stealth, an enemy can use a Reactionary Action for perception, negating the need to roll later on their turn.
+                                    </TextBlock>
+                                </ScrollViewer>
+                            </Expander>
+                        </Border>
+
+                        <Border Background="{DynamicResource CardBackground}" CornerRadius="6" Margin="0,0,0,12" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1">
+                            <Expander Padding="15" Foreground="{DynamicResource AppForeground}">
+                                <Expander.Header>
+                                    <TextBlock Text="Actions, Initiative &amp; Spirituality" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource AccentColor}"/>
+                                </Expander.Header>
+                                <ScrollViewer MaxHeight="300" VerticalScrollBarVisibility="Auto" Margin="0,10,0,0" Padding="0,0,10,0">
+                                    <TextBlock TextWrapping="Wrap" FontSize="14" LineHeight="22" Foreground="{DynamicResource AppForeground}">
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Spirituality:"/><LineBreak/>
+                                        • Base is 0. Each spirit gained increases it by 3.<LineBreak/>
+                                        • Regenerates 10% of Spirituality every hour (Doubles at mid sequence, doubles again at high sequence).<LineBreak/>
+                                        • <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Reserving:"/> If an ability reserves spirituality, it means that the spirituality taken is unusable until the ability that took it is disabled.<LineBreak/>
+                                        • <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Effectiveness:"/> When executing abilities those abilities enjoy sequence bonus if you try to get a higher effectiveness. Base effectiveness is 10+seq but can be exchanged with a dice roll.<LineBreak/><LineBreak/>
+                                        
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Initiative:"/><LineBreak/>
+                                        • Roll is d20 + seq + movement.<LineBreak/>
+                                        • On a nat 20 you get two turns back to back to back.<LineBreak/>
+                                        • On a nat 1 you lose your first turn.<LineBreak/><LineBreak/>
+                                        
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Actions (1 Main, 2 Extra, 1 Movement, 1 Reaction):"/><LineBreak/>
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Main Action:"/> An action taken to dmg the other person, usually an action which costs a lot of spirituality and has a lot of impact on the battle flow.<LineBreak/>
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Extra Action:"/> An action meant to cast less significant spells and mainly to buff yourself or teammates and debuff enemies.<LineBreak/>
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Free Action:"/> An action meant mainly for Role Play which can be used infinite times. It includes talking, snapping your fingers or other stuff. This can be used alongside other actions to give them a better RP feeling.<LineBreak/>
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Reactionary Action:"/> An action which can be used if the enemy intends to target you. This action will always move before the enemy's action. Only specific abilities where its mentioned can be used as such an action.<LineBreak/>
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Movement Action:"/> An action meant to move a certain distance and to flee from battle. You can move an amount of meters equal to (10+Movement)*2, using an extra action you can dash for half of your movement (rounded down). Movement is added onto initiative rolls.
+                                    </TextBlock>
+                                </ScrollViewer>
+                            </Expander>
+                        </Border>
+
+                        <Border Background="{DynamicResource CardBackground}" CornerRadius="6" Margin="0,0,0,12" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1">
+                            <Expander Padding="15" Foreground="{DynamicResource AppForeground}">
+                                <Expander.Header>
+                                    <TextBlock Text="Commanding Things" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource AccentColor}"/>
+                                </Expander.Header>
+                                <ScrollViewer MaxHeight="300" VerticalScrollBarVisibility="Auto" Margin="0,10,0,0" Padding="0,0,10,0">
+                                    <TextBlock TextWrapping="Wrap" FontSize="14" LineHeight="22" Foreground="{DynamicResource AppForeground}">
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Action Cost:"/> When commanding Spirits, Mechanical Automatons, or Animals, an <Run FontWeight="Bold" Text="Extra Action"/> is used to relay the command.<LineBreak/><LineBreak/>
+                                        
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Minion Actions:"/> Each Minion has 1 Main, 2 Extras, and Movement to expend. Only the usage of a Main or Extra requires a relay of a command. The Minion can move on their own to execute the command.<LineBreak/><LineBreak/>
+                                        
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Agency &amp; Disobedience:"/> If a command is directly harmful towards the Minion and it has enough agency, it may choose to disobey the command, either not doing it or doing it in a different way that doesn’t bring harm to it.<LineBreak/><LineBreak/>
+                                        
+                                        <Run FontWeight="Bold" Foreground="{DynamicResource AccentColor}" Text="Power Dynamics:"/> A Minion that is more powerful than its Commander may choose to not follow commands at all unless the Commander has a way to make it follow them.
+                                    </TextBlock>
+                                </ScrollViewer>
+                            </Expander>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
             </TabItem>
 
         </TabControl>

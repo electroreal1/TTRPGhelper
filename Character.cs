@@ -1,15 +1,179 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Collections.ObjectModel;
 
 namespace TTRPGhelper
 {
+    public class StatProxy : INotifyPropertyChanged
+    {
+        public string Name { get; set; }
+        private Func<int> getXp;
+        private Action<int> setXp;    
+        private Func<int> getMod;
+        private Action<int> setMod;  
+        private Func<int> getTotal;
+
+        public StatProxy(string name, Func<int> getXp, Action<int> setXp, Func<int> getMod, Action<int> setMod, Func<int> getTotal)
+        {
+            Name = name;
+            this.getXp = getXp;
+            this.setXp = setXp;
+            this.getMod = getMod;
+            this.setMod = setMod;
+            this.getTotal = getTotal; 
+        }
+
+        public int XP
+        {
+            get => getXp();
+            set { setXp(value); OnPropertyChanged(); OnPropertyChanged(nameof(Total)); }
+        }
+
+        public int Mod
+        {
+            get => getMod();
+            set { setMod(value); OnPropertyChanged(); OnPropertyChanged(nameof(Total)); }
+        }
+
+        public int Total => getTotal();
+
+        public void Update()
+        {
+            OnPropertyChanged(nameof(XP));
+            OnPropertyChanged(nameof(Mod));
+            OnPropertyChanged(nameof(Total));
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+    }
+
+    public class CustomStat : INotifyPropertyChanged
+    {
+        private string name;
+        public string Name
+        {
+            get => name;
+            set { name = value; OnPropertyChanged(); }
+        }
+
+        private int xp;
+        public int XP
+        {
+            get => xp;
+            set { xp = value; OnPropertyChanged(); OnPropertyChanged(nameof(Level)); OnPropertyChanged(nameof(Total)); }
+        }
+
+        private int mod;
+        public int Mod
+        {
+            get => mod;
+            set { mod = value; OnPropertyChanged(); OnPropertyChanged(nameof(Total)); }
+        }
+
+        public int Level
+        {
+            get
+            {
+                if (XP >= 5350) return 4;
+                if (XP >= 1350) return 3;
+                if (XP >= 550) return 2;
+                if (XP >= 200) return 1;
+                return 0;
+            }
+        }
+
+        public int Total
+        {
+            get
+            {
+                int bonus = 0;
+                if (Level >= 4) bonus = 5;
+                else if (Level == 3) bonus = 3;
+                else if (Level == 2) bonus = 2;
+                else if (Level == 1) bonus = 1;
+                return Mod + bonus;
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+    }
+
     public class Character : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
+        public ObservableCollection<StatProxy> PathwayStatList { get; }
+        public ObservableCollection<StatProxy> CoreStatList { get; }
+        public ObservableCollection<CustomStat> CustomSkills { get; set; }
+
+        public Character()
+        {
+            CustomSkills = new ObservableCollection<CustomStat>();
+
+            PathwayStatList = new ObservableCollection<StatProxy>
+            {
+                new StatProxy("Melee XP:", () => MeleeXP, v => MeleeXP = v, () => MeleeMod, v => MeleeMod = v, () => TotalMelee),
+                new StatProxy("Secrecy XP:", () => SecrecyXP, v => SecrecyXP = v, () => SecrecyMod, v => SecrecyMod = v, () => TotalSecrecy),
+                new StatProxy("Speech XP:", () => SpeechXP, v => SpeechXP = v, () => SpeechMod, v => SpeechMod = v, () => TotalSpeech),
+                new StatProxy("Autopsy XP:", () => AutopsyXP, v => AutopsyXP = v, () => AutopsyMod, v => AutopsyMod = v, () => TotalAutopsy),
+                new StatProxy("Intimidate XP:", () => IntimidationXP, v => IntimidationXP = v, () => IntimidationMod, v => IntimidationMod = v, () => TotalIntimidation),
+                new StatProxy("Pharmacy XP:", () => PharmacyXP, v => PharmacyXP = v, () => PharmacyMod, v => PharmacyMod = v, () => TotalPharmacy),
+                new StatProxy("Beast Taming XP:", () => BeastTamingXP, v => BeastTamingXP = v, () => BeastTamingMod, v => BeastTamingMod = v, () => TotalBeastTaming),
+                new StatProxy("Law XP:", () => LawXP, v => LawXP = v, () => LawMod, v => LawMod = v, () => TotalLaw),
+                new StatProxy("Persuasion XP:", () => PersuasionXP, v => PersuasionXP = v, () => PersuasionMod, v => PersuasionMod = v, () => TotalPersuasion),
+                new StatProxy("Botany XP:", () => BotanyXP, v => BotanyXP = v, () => BotanyMod, v => BotanyMod = v, () => TotalBotany),
+                new StatProxy("Medicine XP:", () => MedicineXP, v => MedicineXP = v, () => MedicineMod, v => MedicineMod = v, () => TotalMedicine),
+                new StatProxy("Performance XP:", () => PerformanceXP, v => PerformanceXP = v, () => PerformanceMod, v => PerformanceMod = v, () => TotalPerformance),
+                new StatProxy("Astrology XP:", () => AstrologyXP, v => AstrologyXP = v, () => AstrologyMod, v => AstrologyMod = v, () => TotalAstrology),
+                new StatProxy("Stealth XP:", () => StealthXP, v => StealthXP = v, () => StealthMod, v => StealthMod = v, () => TotalStealth),
+                new StatProxy("Sleight Of Hand XP:", () => SleightOfHandXP, v => SleightOfHandXP = v, () => SleightOfHandMod, v => SleightOfHandMod = v, () => TotalSleightOfHand),
+                new StatProxy("Acrobatics XP:", () => AcrobaticsXP, v => AcrobaticsXP = v, () => AcrobaticsMod, v => AcrobaticsMod = v, () => TotalAcrobatics),
+                new StatProxy("Deception XP:", () => DeceptionXP, v => DeceptionXP = v, () => DeceptionMod, v => DeceptionMod = v, () => TotalDeception),
+                new StatProxy("Disguise XP:", () => DisguiseXP, v => DisguiseXP = v, () => DisguiseMod, v => DisguiseMod = v, () => TotalDisguise)
+            };
+
+            CoreStatList = new ObservableCollection<StatProxy>
+            {
+                new StatProxy("Strength XP:", () => StrengthXP, v => StrengthXP = v, () => StrMod, v => StrMod = v, () => TotalStrength),
+                new StatProxy("Dexterity XP:", () => DexterityXP, v => DexterityXP = v, () => DexMod, v => DexMod = v, () => TotalDexterity),
+                new StatProxy("Constit. XP:", () => ConstitutionXP, v => ConstitutionXP = v, () => ConMod, v => ConMod = v, () => TotalConstitution),
+                new StatProxy("Mind XP:", () => MindXP, v => MindXP = v, () => MindMod, v => MindMod = v, () => TotalMind),
+                new StatProxy("Exercise XP:", () => ExerciseXP, v => ExerciseXP = v, () => ExerciseMod, v => ExerciseMod = v, () => TotalExercise),
+                new StatProxy("Move XP:", () => MovementXP, v => MovementXP = v, () => MoveMod, v => MoveMod = v, () => TotalMovementXP),
+                new StatProxy("Foresight XP:", () => ForesightXP, v => ForesightXP = v, () => ForesightMod, v => ForesightMod = v, () => TotalForesight),
+                new StatProxy("Martial Arts XP:", () => MartialArtsXP, v => MartialArtsXP = v, () => MartialArtsMod, v => MartialArtsMod = v, () => TotalMartialArts)
+            };
+
+            this.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName != null && (e.PropertyName.StartsWith("Total") || e.PropertyName == "ApplyOnTop"))
+                {
+                    foreach (var proxy in PathwayStatList)
+                    {
+                        proxy.Update();
+                    }
+                    foreach (var proxy in CoreStatList)
+                    {
+                        proxy.Update();
+                    }
+                    RecalculateCoreStats();
+                }
+            };
         }
 
         private string name = "New Character";
@@ -59,6 +223,13 @@ namespace TTRPGhelper
             set { honorificName = value; OnPropertyChanged(); }
         }
 
+        private string tamedAnimals = "";
+        public string TamedAnimals
+        {
+            get => tamedAnimals;
+            set { tamedAnimals = value; OnPropertyChanged(); }
+        }
+
         private string notes = "";
         public string Notes
         {
@@ -86,62 +257,104 @@ namespace TTRPGhelper
             get => personality;
             set { personality = value; OnPropertyChanged(); }
         }
-
-        private int maxhp = 10;
+        private int baseHp = 10;
         public int MaxHP
         {
-            get => maxhp;
-            set { maxhp = value; OnPropertyChanged(); }
+            get => baseHp + GetConstitutionHpBonus() + GetExerciseHpBonus();
+            set { baseHp = value; OnPropertyChanged(); OnPropertyChanged(nameof(CurrentHP)); }
         }
 
         private int currenthp = 10;
         public int CurrentHP
         {
-            get => currenthp;
+            get => Math.Min(currenthp, MaxHP);
             set { currenthp = value; OnPropertyChanged(); }
         }
 
-        private int maxshp = 4;
+        private int baseShp = 4;
         public int MaxSHP
         {
-            get => maxshp;
-            set { maxshp = value; OnPropertyChanged(); }
+            get => baseShp + GetMindShpBonus();
+            set { baseShp = value; OnPropertyChanged(); OnPropertyChanged(nameof(CurrentSHP)); }
         }
 
         private int currentshp = 4;
         public int CurrentSHP
         {
-            get => currentshp;
+            get => Math.Min(currentshp, MaxSHP);
             set { currentshp = value; OnPropertyChanged(); }
         }
 
-        private int ac = 10;
+        private int baseAc = 10;
         public int AC
         {
-            get => ac;
-            set { ac = value; OnPropertyChanged(); }
+            get => baseAc + GetDexterityAcBonus();
+            set { baseAc = value; OnPropertyChanged(); }
         }
 
         private int maxspirituality = 0;
         public int MaxSpirituality
         {
             get => maxspirituality;
-            set { maxspirituality = value; OnPropertyChanged(); }
+            set
+            {
+                maxspirituality = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(DisplayMaxSpirituality));
+            }
         }
 
         private int currentspirituality = 0;
         public int CurrentSpirituality
         {
             get => currentspirituality;
-            set { currentspirituality = value; OnPropertyChanged(); }
+            set
+            {
+                currentspirituality = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(DisplayCurrentSpirituality));
+            }
         }
 
-        private int movement = 0;
+        public int DisplayMaxSpirituality => MaxSpirituality * 3;
+        public int DisplayCurrentSpirituality => CurrentSpirituality * 3;
+
+        private int baseMovement = 0;
         public int Movement
         {
-            get => movement;
-            set { movement = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalMovement)); }
+            get => baseMovement + GetMovementBonus() + GetExerciseMovementBonus();
+            set { baseMovement = value; OnPropertyChanged(); }
         }
+
+        private int healing = 0;
+        public int Healing
+        {
+            get => healing;
+            set { healing = value; OnPropertyChanged(); }
+        }
+
+        private int instantActions = 0;
+        public int InstantActions
+        {
+            get => instantActions;
+            set { instantActions = value; OnPropertyChanged(); }
+        }
+
+        private int baseReactionary = 1;
+        public int ReactionaryActions
+        {
+            get => baseReactionary + GetForesightReactionaryBonus();
+            set { baseReactionary = value; OnPropertyChanged(); }
+        }
+
+        private int baseToHit = 0;
+        public int ToHit
+        {
+            get => baseToHit + GetMartialArtsHitBonus();
+            set { baseToHit = value; OnPropertyChanged(); }
+        }
+
+        public int DamageBonus => GetStrengthDamageBonus() + GetExerciseDamageBonus();
 
         private int constitutionXP;
         public int ConstitutionXP
@@ -203,20 +416,65 @@ namespace TTRPGhelper
         public int DexLevel => GetLevel(DexterityXP);
         public int TotalDexterity => DexLevel + DexMod;
 
+        private int mindXP;
+        public int MindXP
+        {
+            get => mindXP;
+            set { mindXP = value; OnPropertyChanged(); OnPropertyChanged(nameof(MindLevel)); OnPropertyChanged(nameof(TotalMind)); }
+        }
+        private int mindMod;
+        public int MindMod
+        {
+            get => mindMod;
+            set { mindMod = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalMind)); }
+        }
+        public int MindLevel => GetLevel(MindXP);
+        public int TotalMind => MindLevel + MindMod;
+
         private int movementXP;
         public int MovementXP
         {
             get => movementXP;
-            set { movementXP = value; OnPropertyChanged(); OnPropertyChanged(nameof(MoveLevel)); OnPropertyChanged(nameof(TotalMovement)); }
+            set { movementXP = value; OnPropertyChanged(); OnPropertyChanged(nameof(MoveLevel)); OnPropertyChanged(nameof(TotalMovementXP)); }
         }
         private int moveMod;
         public int MoveMod
         {
             get => moveMod;
-            set { moveMod = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalMovement)); }
+            set { moveMod = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalMovementXP)); }
         }
         public int MoveLevel => GetLevel(MovementXP);
-        public int TotalMovement => Movement + MoveLevel + MoveMod;
+        public int TotalMovementXP => MoveLevel + MoveMod;
+
+        private int foresightXP;
+        public int ForesightXP
+        {
+            get => foresightXP;
+            set { foresightXP = value; OnPropertyChanged(); OnPropertyChanged(nameof(ForesightLevel)); OnPropertyChanged(nameof(TotalForesight)); }
+        }
+        private int foresightMod;
+        public int ForesightMod
+        {
+            get => foresightMod;
+            set { foresightMod = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalForesight)); }
+        }
+        public int ForesightLevel => GetLevel(ForesightXP);
+        public int TotalForesight => ForesightLevel + ForesightMod;
+
+        private int martialArtsXP;
+        public int MartialArtsXP
+        {
+            get => martialArtsXP;
+            set { martialArtsXP = value; OnPropertyChanged(); OnPropertyChanged(nameof(MartialArtsLevel)); OnPropertyChanged(nameof(TotalMartialArts)); }
+        }
+        private int martialArtsMod;
+        public int MartialArtsMod
+        {
+            get => martialArtsMod;
+            set { martialArtsMod = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalMartialArts)); }
+        }
+        public int MartialArtsLevel => GetLevel(MartialArtsXP);
+        public int TotalMartialArts => MartialArtsLevel + MartialArtsMod;
 
         private int secrecy = 0;
         public int Secrecy
@@ -237,7 +495,7 @@ namespace TTRPGhelper
             set { secrecyMod = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalSecrecy)); }
         }
         public int SecrecyLevel => GetLevel(SecrecyXP);
-        public int TotalSecrecy => Secrecy + SecrecyLevel + SecrecyMod;
+        public int TotalSecrecy => Secrecy + GetSkillBonus(SecrecyLevel) + SecrecyMod;
 
         private int speech = 0;
         public int Speech
@@ -258,7 +516,7 @@ namespace TTRPGhelper
             set { speechMod = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalSpeech)); }
         }
         public int SpeechLevel => GetLevel(SpeechXP);
-        public int TotalSpeech => Speech + SpeechLevel + SpeechMod;
+        public int TotalSpeech => Speech + GetSkillBonus(SpeechLevel) + SpeechMod;
 
         private int autopsy = 0;
         public int Autopsy
@@ -279,7 +537,7 @@ namespace TTRPGhelper
             set { autopsyMod = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalAutopsy)); }
         }
         public int AutopsyLevel => GetLevel(AutopsyXP);
-        public int TotalAutopsy => Autopsy + AutopsyLevel + AutopsyMod;
+        public int TotalAutopsy => Autopsy + GetSkillBonus(AutopsyLevel) + AutopsyMod;
 
         private int intimidation = 0;
         public int Intimidation
@@ -300,7 +558,7 @@ namespace TTRPGhelper
             set { intimidationMod = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalIntimidation)); }
         }
         public int IntimidationLevel => GetLevel(IntimidationXP);
-        public int TotalIntimidation => Intimidation + IntimidationLevel + IntimidationMod;
+        public int TotalIntimidation => Intimidation + GetSkillBonus(IntimidationLevel) + IntimidationMod;
 
         private int melee = 0;
         public int Melee
@@ -321,10 +579,283 @@ namespace TTRPGhelper
             set { meleeMod = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalMelee)); }
         }
         public int MeleeLevel => GetLevel(MeleeXP);
-        public int TotalMelee => Melee + MeleeLevel + MeleeMod;
+        public int TotalMelee => Melee + GetSkillBonus(MeleeLevel) + MeleeMod;
 
-        private List<PathwayAbility> activeAbilities = new List<PathwayAbility>();
-        public List<PathwayAbility> ActiveAbilities
+        private int pharmacyStat = 0;
+        public int PharmacyStat
+        {
+            get => pharmacyStat;
+            set { pharmacyStat = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalPharmacy)); }
+        }
+        private int pharmacyXP;
+        public int PharmacyXP
+        {
+            get => pharmacyXP;
+            set { pharmacyXP = value; OnPropertyChanged(); OnPropertyChanged(nameof(PharmacyLevel)); OnPropertyChanged(nameof(TotalPharmacy)); }
+        }
+        private int pharmacyMod;
+        public int PharmacyMod
+        {
+            get => pharmacyMod;
+            set { pharmacyMod = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalPharmacy)); }
+        }
+        public int PharmacyLevel => GetLevel(PharmacyXP);
+        public int TotalPharmacy => PharmacyStat + GetSkillBonus(PharmacyLevel) + PharmacyMod;
+
+        private int beastTaming = 0;
+        public int BeastTaming
+        {
+            get => beastTaming;
+            set { beastTaming = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalBeastTaming)); }
+        }
+        private int beastTamingXP;
+        public int BeastTamingXP
+        {
+            get => beastTamingXP;
+            set { beastTamingXP = value; OnPropertyChanged(); OnPropertyChanged(nameof(BeastTamingLevel)); OnPropertyChanged(nameof(TotalBeastTaming)); }
+        }
+        private int beastTamingMod;
+        public int BeastTamingMod
+        {
+            get => beastTamingMod;
+            set { beastTamingMod = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalBeastTaming)); }
+        }
+        public int BeastTamingLevel => GetLevel(BeastTamingXP);
+        public int TotalBeastTaming => BeastTaming + GetSkillBonus(BeastTamingLevel) + BeastTamingMod;
+
+        private int law = 0;
+        public int Law
+        {
+            get => law;
+            set { law = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalLaw)); }
+        }
+        private int lawXP;
+        public int LawXP
+        {
+            get => lawXP;
+            set { lawXP = value; OnPropertyChanged(); OnPropertyChanged(nameof(LawLevel)); OnPropertyChanged(nameof(TotalLaw)); }
+        }
+        private int lawMod;
+        public int LawMod
+        {
+            get => lawMod;
+            set { lawMod = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalLaw)); }
+        }
+        public int LawLevel => GetLevel(LawXP);
+        public int TotalLaw => Law + GetSkillBonus(LawLevel) + LawMod;
+
+        private int persuasion = 0;
+        public int Persuasion
+        {
+            get => persuasion;
+            set { persuasion = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalPersuasion)); }
+        }
+        private int persuasionXP;
+        public int PersuasionXP
+        {
+            get => persuasionXP;
+            set { persuasionXP = value; OnPropertyChanged(); OnPropertyChanged(nameof(PersuasionLevel)); OnPropertyChanged(nameof(TotalPersuasion)); }
+        }
+        private int persuasionMod;
+        public int PersuasionMod
+        {
+            get => persuasionMod;
+            set { persuasionMod = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalPersuasion)); }
+        }
+        public int PersuasionLevel => GetLevel(PersuasionXP);
+        public int TotalPersuasion => Persuasion + GetSkillBonus(PersuasionLevel) + PersuasionMod;
+
+        private int botany = 0;
+        public int Botany
+        {
+            get => botany;
+            set { botany = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalBotany)); }
+        }
+        private int botanyXP;
+        public int BotanyXP
+        {
+            get => botanyXP;
+            set { botanyXP = value; OnPropertyChanged(); OnPropertyChanged(nameof(BotanyLevel)); OnPropertyChanged(nameof(TotalBotany)); }
+        }
+        private int botanyMod;
+        public int BotanyMod
+        {
+            get => botanyMod;
+            set { botanyMod = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalBotany)); }
+        }
+        public int BotanyLevel => GetLevel(BotanyXP);
+        public int TotalBotany => Botany + GetSkillBonus(BotanyLevel) + BotanyMod;
+
+        private int medicine = 0;
+        public int Medicine
+        {
+            get => medicine;
+            set { medicine = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalMedicine)); }
+        }
+        private int medicineXP;
+        public int MedicineXP
+        {
+            get => medicineXP;
+            set { medicineXP = value; OnPropertyChanged(); OnPropertyChanged(nameof(MedicineLevel)); OnPropertyChanged(nameof(TotalMedicine)); }
+        }
+        private int medicineMod;
+        public int MedicineMod
+        {
+            get => medicineMod;
+            set { medicineMod = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalMedicine)); }
+        }
+        public int MedicineLevel => GetLevel(MedicineXP);
+        public int TotalMedicine => Medicine + GetSkillBonus(MedicineLevel) + MedicineMod;
+
+        private int performance = 0;
+        public int Performance
+        {
+            get => performance;
+            set { performance = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalPerformance)); }
+        }
+        private int performanceXP;
+        public int PerformanceXP
+        {
+            get => performanceXP;
+            set { performanceXP = value; OnPropertyChanged(); OnPropertyChanged(nameof(PerformanceLevel)); OnPropertyChanged(nameof(TotalPerformance)); }
+        }
+        private int performanceMod;
+        public int PerformanceMod
+        {
+            get => performanceMod;
+            set { performanceMod = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalPerformance)); }
+        }
+        public int PerformanceLevel => GetLevel(PerformanceXP);
+        public int TotalPerformance => Performance + GetSkillBonus(PerformanceLevel) + PerformanceMod;
+
+        private int astrology = 0;
+        public int Astrology
+        {
+            get => astrology;
+            set { astrology = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalAstrology)); }
+        }
+        private int astrologyXP;
+        public int AstrologyXP
+        {
+            get => astrologyXP;
+            set { astrologyXP = value; OnPropertyChanged(); OnPropertyChanged(nameof(AstrologyLevel)); OnPropertyChanged(nameof(TotalAstrology)); }
+        }
+        private int astrologyMod;
+        public int AstrologyMod
+        {
+            get => astrologyMod;
+            set { astrologyMod = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalAstrology)); }
+        }
+        public int AstrologyLevel => GetLevel(AstrologyXP);
+        public int TotalAstrology => Astrology + GetSkillBonus(AstrologyLevel) + AstrologyMod;
+
+        private int stealth = 0;
+        public int Stealth
+        {
+            get => stealth;
+            set { stealth = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalStealth)); }
+        }
+        private int stealthXP;
+        public int StealthXP
+        {
+            get => stealthXP;
+            set { stealthXP = value; OnPropertyChanged(); OnPropertyChanged(nameof(StealthLevel)); OnPropertyChanged(nameof(TotalStealth)); }
+        }
+        private int stealthMod;
+        public int StealthMod
+        {
+            get => stealthMod;
+            set { stealthMod = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalStealth)); }
+        }
+        public int StealthLevel => GetLevel(StealthXP);
+        public int TotalStealth => Stealth + GetSkillBonus(StealthLevel) + StealthMod;
+
+        private int sleightOfHand = 0;
+        public int SleightOfHand
+        {
+            get => sleightOfHand;
+            set { sleightOfHand = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalSleightOfHand)); }
+        }
+        private int sleightOfHandXP;
+        public int SleightOfHandXP
+        {
+            get => sleightOfHandXP;
+            set { sleightOfHandXP = value; OnPropertyChanged(); OnPropertyChanged(nameof(SleightOfHandLevel)); OnPropertyChanged(nameof(TotalSleightOfHand)); }
+        }
+        private int sleightOfHandMod;
+        public int SleightOfHandMod
+        {
+            get => sleightOfHandMod;
+            set { sleightOfHandMod = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalSleightOfHand)); }
+        }
+        public int SleightOfHandLevel => GetLevel(SleightOfHandXP);
+        public int TotalSleightOfHand => SleightOfHand + GetSkillBonus(SleightOfHandLevel) + SleightOfHandMod;
+
+        private int acrobatics = 0;
+        public int Acrobatics
+        {
+            get => acrobatics;
+            set { acrobatics = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalAcrobatics)); }
+        }
+        private int acrobaticsXP;
+        public int AcrobaticsXP
+        {
+            get => acrobaticsXP;
+            set { acrobaticsXP = value; OnPropertyChanged(); OnPropertyChanged(nameof(AcrobaticsLevel)); OnPropertyChanged(nameof(TotalAcrobatics)); }
+        }
+        private int acrobaticsMod;
+        public int AcrobaticsMod
+        {
+            get => acrobaticsMod;
+            set { acrobaticsMod = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalAcrobatics)); }
+        }
+        public int AcrobaticsLevel => GetLevel(AcrobaticsXP);
+        public int TotalAcrobatics => Acrobatics + GetSkillBonus(AcrobaticsLevel) + AcrobaticsMod;
+
+        private int deception = 0;
+        public int Deception
+        {
+            get => deception;
+            set { deception = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalDeception)); }
+        }
+        private int deceptionXP;
+        public int DeceptionXP
+        {
+            get => deceptionXP;
+            set { deceptionXP = value; OnPropertyChanged(); OnPropertyChanged(nameof(DeceptionLevel)); OnPropertyChanged(nameof(TotalDeception)); }
+        }
+        private int deceptionMod;
+        public int DeceptionMod
+        {
+            get => deceptionMod;
+            set { deceptionMod = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalDeception)); }
+        }
+        public int DeceptionLevel => GetLevel(DeceptionXP);
+        public int TotalDeception => Deception + GetSkillBonus(DeceptionLevel) + DeceptionMod;
+
+        private int disguise = 0;
+        public int Disguise
+        {
+            get => disguise;
+            set { disguise = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalDisguise)); }
+        }
+        private int disguiseXP;
+        public int DisguiseXP
+        {
+            get => disguiseXP;
+            set { disguiseXP = value; OnPropertyChanged(); OnPropertyChanged(nameof(DisguiseLevel)); OnPropertyChanged(nameof(TotalDisguise)); }
+        }
+        private int disguiseMod;
+        public int DisguiseMod
+        {
+            get => disguiseMod;
+            set { disguiseMod = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalDisguise)); }
+        }
+        public int DisguiseLevel => GetLevel(DisguiseXP);
+        public int TotalDisguise => Disguise + GetSkillBonus(DisguiseLevel) + DisguiseMod;
+
+        private ObservableCollection<PathwayAbility> activeAbilities = new ObservableCollection<PathwayAbility>();
+        public ObservableCollection<PathwayAbility> ActiveAbilities
         {
             get => activeAbilities;
             set { activeAbilities = value; OnPropertyChanged(); }
@@ -332,556 +863,220 @@ namespace TTRPGhelper
 
         private int GetLevel(int xp)
         {
-            if (xp >= 4000) return 4;
-            if (xp >= 800) return 3;
-            if (xp >= 350) return 2;
+            if (xp >= 5350) return 4;
+            if (xp >= 1350) return 3;
+            if (xp >= 550) return 2;
             if (xp >= 200) return 1;
             return 0;
+        }
+
+        public int GetSkillBonus(int lvl)
+        {
+            if (lvl >= 4) return 5;
+            if (lvl == 3) return 3;
+            if (lvl == 2) return 2;
+            if (lvl == 1) return 1;
+            return 0;
+        }
+
+        // --- MATH FUNCTIONS FOR CORE STAT BONUSES ---
+
+        private int GetConstitutionHpBonus()
+        {
+            int lvl = TotalConstitution;
+            if (lvl >= 4) return 12;
+            if (lvl == 3) return 8;
+            if (lvl == 2) return 5;
+            if (lvl == 1) return 2;
+            return 0;
+        }
+
+        private int GetExerciseHpBonus()
+        {
+            int lvl = TotalExercise;
+            if (lvl >= 4) return 5;
+            if (lvl == 3) return 5;
+            if (lvl == 2) return 3;
+            if (lvl == 1) return 1;
+            return 0;
+        }
+
+        private int GetMindShpBonus()
+        {
+            int lvl = TotalMind;
+            if (lvl >= 4) return 14;
+            if (lvl == 3) return 9;
+            if (lvl == 2) return 5;
+            if (lvl == 1) return 2;
+            return 0;
+        }
+
+        private int GetDexterityAcBonus()
+        {
+            int lvl = TotalDexterity;
+            if (lvl >= 4) return 6;
+            if (lvl == 3) return 4;
+            if (lvl == 2) return 2;
+            if (lvl == 1) return 1;
+            return 0;
+        }
+
+        private int GetMovementBonus()
+        {
+            int lvl = TotalMovementXP;
+            if (lvl >= 4) return 8;
+            if (lvl == 3) return 4;
+            if (lvl == 2) return 2;
+            if (lvl == 1) return 1;
+            return 0;
+        }
+
+        private int GetExerciseMovementBonus()
+        {
+            int lvl = TotalExercise;
+            if (lvl >= 3) return 1;
+            return 0;
+        }
+
+        private int GetStrengthDamageBonus()
+        {
+            int lvl = TotalStrength;
+            if (lvl >= 4) return 11;
+            if (lvl == 3) return 8;
+            if (lvl == 2) return 5;
+            if (lvl == 1) return 2;
+            return 0;
+        }
+
+        private int GetExerciseDamageBonus()
+        {
+            int lvl = TotalExercise;
+            if (lvl >= 4) return 4;
+            if (lvl == 3) return 4;
+            if (lvl == 2) return 3;
+            if (lvl == 1) return 1;
+            return 0;
+        }
+
+        private int GetMartialArtsHitBonus()
+        {
+            int lvl = TotalMartialArts;
+            if (lvl >= 4) return 5;
+            if (lvl == 3) return 3;
+            if (lvl == 2) return 2;
+            if (lvl == 1) return 1;
+            return 0;
+        }
+
+        private int GetForesightReactionaryBonus()
+        {
+            int lvl = TotalForesight;
+            return lvl / 4;
+        }
+
+        public void RecalculateCoreStats()
+        {
+            OnPropertyChanged(nameof(MaxHP));
+            OnPropertyChanged(nameof(MaxSHP));
+            OnPropertyChanged(nameof(AC));
+            OnPropertyChanged(nameof(Movement));
+            OnPropertyChanged(nameof(ToHit));
+            OnPropertyChanged(nameof(DamageBonus));
+            OnPropertyChanged(nameof(ReactionaryActions));
         }
 
         public void ApplyPathwayStats()
         {
             if (!ApplyOnTop)
             {
-                MaxHP = 10;
-                MaxSHP = 4;
-                AC = 10;
+                baseHp = 10;
+                baseShp = 4;
+                baseAc = 10;
                 MaxSpirituality = 0;
-                Movement = 0;
+                baseMovement = 0;
+                Healing = 0;
+                InstantActions = 0;
+                baseReactionary = 1;
+                baseToHit = 0;
                 Secrecy = 0;
                 Speech = 0;
                 Autopsy = 0;
                 Intimidation = 0;
                 Melee = 0;
+                PharmacyStat = 0;
+                BeastTaming = 0;
+                Law = 0;
+                Persuasion = 0;
+                Botany = 0;
+                Medicine = 0;
+                Performance = 0;
+                Astrology = 0;
+                Stealth = 0;
+                SleightOfHand = 0;
+                Acrobatics = 0;
+                Deception = 0;
+                Disguise = 0;
             }
 
             ActiveAbilities.Clear();
 
-            if (SelectedPathway == "Darkness")
+            switch (SelectedPathway)
             {
-                ApplyDarknessPathway();
-            }
-            else if (SelectedPathway == "Death")
-            {
-                ApplyDeathPathway();
-            }
-            else if (SelectedPathway == "Twilight Giant")
-            {
-                ApplyTwilightGiantPathway();
+                case "Darkness":
+                    EternalDarkness.ApplyDarknessPathway(this);
+                    break;
+                case "Death":
+                    EternalDarkness.ApplyDeathPathway(this);
+                    break;
+                case "Twilight Giant":
+                    EternalDarkness.ApplyTwilightGiantPathway(this);
+                    break;
+                case "Moon":
+                    GoddessOfOrigin.ApplyMoonPathway(this);
+                    break;
+                case "Mother":
+                    GoddessOfOrigin.ApplyMotherPathway(this);
+                    break;
+                case "Justiciar":
+                    TheAnarchy.ApplyJusticiarPathway(this);
+                    break;
+                case "Black Emperor":
+                    TheAnarchy.ApplyBlackEmperorPathway(this);
+                    break;
+                case "Door":
+                    LordOfMysteries.ApplyDoorPathway(this);
+                    break;
+                case "Error":
+                    LordOfMysteries.ApplyErrorPathway(this);
+                    break;
             }
 
+            RecalculateCoreStats();
             CurrentHP = MaxHP;
             CurrentSHP = MaxSHP;
-            CurrentSpirituality = MaxSpirituality;
+            CurrentSpirituality = maxspirituality;
 
             OnPropertyChanged(nameof(ActiveAbilities));
         }
 
-        private void AddOrUpgradeAbility(string keyword, string newName, string descriptionAddition)
+        public void AddCustomSkill()
         {
-            var existingAbility = activeAbilities.Find(a => a.Name.Contains(keyword));
+            CustomSkills.Add(new CustomStat { Name = "New Skill", XP = 0, Mod = 0 });
+        }
+
+        public void AddOrUpgradeAbility(string keyword, string newName, string descriptionAddition)
+        {
+            var existingAbility = activeAbilities.FirstOrDefault(a => a.Name.Contains(keyword));
 
             if (existingAbility != null)
             {
                 existingAbility.Name = newName;
                 existingAbility.Description += $"\n\n[Upgraded]: {descriptionAddition}";
+                OnPropertyChanged(nameof(ActiveAbilities));
             }
             else
             {
                 activeAbilities.Add(new PathwayAbility(newName, descriptionAddition));
-            }
-        }
-
-        private void ApplyDarknessPathway()
-        {
-            if (CurrentSequence <= 9)
-            {
-                MaxHP += 3;
-                MaxSHP += 2;
-                MaxSpirituality += 3;
-                AC += 1;
-                Secrecy += 1;
-                Speech += 1;
-
-                ActiveAbilities.Add(new PathwayAbility("Nocturnality (Passive)", "The deeper into the night, the more powerful a Sleepless will become. Gain +3 dmg, +2 movement, +1 AC, +1 to hitting, +1 Speech at night. Only need to sleep 2-4 hours a day (+1 daily action)."));
-                ActiveAbilities.Add(new PathwayAbility("Spirituality (Passive)", "Possess high spiritual perception. +1 on using ritualistic magic."));
-
-                ActiveAbilities.Add(new PathwayAbility("Divination",
-                    "Divine the location of connected items or people you possess an item from (Information checks add +5 DC). Can fail/be interfered with by higher status individuals. Roll: 10+Seq+Secrecy.\n" +
-                    "• DC 12: Very rough image of the location.\n" +
-                    "• DC 17: General outline of the area.\n" +
-                    "• DC 22: The block the target is at.\n" +
-                    "• DC 27: The street the target is at.\n" +
-                    "• DC 32: The house complex the target is at.\n" +
-                    "• Nat 20: Exact location of the target.\n" +
-                    "• Nat 1: High spirituality targets notice you. You fall into disarray and are guaranteed to see things you shouldn't."));
-            }
-            if (CurrentSequence <= 8)
-            {
-                MaxHP += 6;
-                MaxSHP += 3;
-                MaxSpirituality += 3;
-                Movement += 1;
-                AC += 1;
-                Secrecy += 1;
-                Speech += 2;
-
-                ActiveAbilities.Add(new PathwayAbility("Midnight Poem (Extra)",
-                        "Cast spells through the recital of a poem. Targets can resist (+2 AC/DC if ears stuffed/cogitating, degrades by -1 per repeated use).\n" +
-                        "• Tranquilize (2 Spirit): Roll 10+Seq+Speech. Reveal abnormal reactions (DCs 10-25).\n" +
-                        "• Lullaby (3 Spirit): Roll 10+Seq+Speech. Put multiple people to sleep for 1 turn (if AC hit).\n" +
-                        "• Pacify (2 Spirit): Roll 10+Seq+Speech. Turn opponents limp. DCs range from 10 (-1 to rolls) to 25 (-3 to rolls for 2 actions)."));
-            }
-            if (CurrentSequence <= 7)
-            {
-                MaxHP += 10;
-                MaxSHP += 3;
-                MaxSpirituality += 2;
-                Movement += 1;
-                AC += 1;
-                Secrecy += 2;
-                Speech += 2;
-                ActiveAbilities.Add(new PathwayAbility("Nightmare State (Passive)", "Separate soul while sleeping. See what people are dreaming within a city-wide range."));
-                ActiveAbilities.Add(new PathwayAbility("Guidance (Extra)", "Roll: 10 + Seq + Speech. Guide targets in dreams to reveal secrets (DCs 10 superficial, Nat 20 lost memories)."));
-                ActiveAbilities.Add(new PathwayAbility("Dream Pulling (Main)", "Cost: 2 Spirit/turn (+0.5 per extra person, max 10). Roll: 10 + Seq + Speech. Forcefully drag targets into dreams."));
-                ActiveAbilities.Add(new PathwayAbility("Nightmare Limbs (Extra)", "Cost: 2 Spirit to summon, 1/turn upkeep. Spawns two tentacles (10HP each). Grants +2 to hitting, +4 dmg. Take 5 dmg if a limb breaks."));
-
-                AddOrUpgradeAbility("Midnight Poem", "Midnight Poem (Extra)", "Recite Midnight Poems without the use of throat; immune to silencing.");
-            }
-            if (CurrentSequence <= 6)
-            {
-                MaxHP += 11;
-                MaxSHP += 3;
-                MaxSpirituality += 3;
-                Movement += 2;
-                AC += 1;
-                Secrecy += 1;
-                Speech += 2;
-                ActiveAbilities.Add(new PathwayAbility("Soul Soothing (Extra)", "Cost: 2 Spirit. Roll: 10 + Seq + Speech. Freezes target (-6 movement) or treats emotional states (Requiem). Heal SHP (DCs 20 to 35)."));
-                ActiveAbilities.Add(new PathwayAbility("Soul Agitating (Extra)", "Cost: 3 Spirit. Roll: 10 + Seq + Speech. Heightens destructive urges and reveals soul problems. Can Provoke or Instigate."));
-
-                AddOrUpgradeAbility("High Spirituality", "Spirituality (Passive)", "+1 to divination, +2 to ritualistic magic.");
-                AddOrUpgradeAbility("Nocturnality", "Nocturnality (Passive)", "Only need 2 hours of rest per day. Gain an additional daily action.");
-            }
-            if (CurrentSequence <= 5)
-            {
-                MaxHP += 8;
-                MaxSHP += 4;
-                MaxSpirituality += 2;
-                AC += 2;
-                Movement += 1;
-                Secrecy += 2;
-                Speech += 1;
-
-                ActiveAbilities.Add(new PathwayAbility("Spirit Commanding (Extra)", "Seal up to 4-5 spirits in teeth. Release to multitask. Roll: 10 + Seq + Speech vs Spirit AC + Remaining HP to Seal. Gain +1 extra action solely for commanding spirits."));
-            }
-            if (CurrentSequence <= 4)
-            {
-                MaxHP *= 2;
-                MaxSHP *= 2;
-                MaxSpirituality *= 2;
-                AC += 1;
-                Movement += 1;
-                Secrecy += 4;
-                Speech += 2;
-                ActiveAbilities.Add(new PathwayAbility("Bloodline Abilities", "Gain specific abilities depending on the True Deity bloodline used for advancement (DM Discretion)."));
-                ActiveAbilities.Add(new PathwayAbility("Night Domain (Extra)", "Cost: 4 Spirit (3/turn upkeep). Removes 2 negative stacks/turn. User/Spirits gain +3 AC. Spirits gain +4 hit, +6 dmg. Enemies get -2 to rolls and 3 stacks Corrosion."));
-                ActiveAbilities.Add(new PathwayAbility("Serene Hair Strands (Extra)", "Cost: 4 Spirit. Roll: 10 + Seq + Secrecy. On hit: -10 movement, lose 2 extra actions, -3 ability checks."));
-                ActiveAbilities.Add(new PathwayAbility("Concealment (Extra)", "Cost: 4 Spirit (3/turn upkeep). Roll: 10 + Seq + Secrecy. Boosts stealth, AC, and causes divinations to fail (DCs 10 to 30)."));
-                ActiveAbilities.Add(new PathwayAbility("Curse of Misfortune (Extra)", "Cost: 6 Spirit. Roll: 10 + Seq + Secrecy. Cause disadvantaged rolls (DCs 20 to 30)."));
-
-                AddOrUpgradeAbility("Nocturnality", "Nocturnality (Passive)", "Enhanced in dark: +6 Dmg, +5 Move, +4 HP Regen/turn, +2 Speech. Weaker in midday sun: -6 Dmg, -3 Move, -2 AC.");
-                AddOrUpgradeAbility("Spirit Commanding", "Spirit Commanding (Extra)", "Can command 1 spirit per tooth (up to 32). Gain 2 more extra actions solely for commanding spirits.");
-            }
-        }
-
-        private void ApplyDeathPathway()
-        {
-            if (CurrentSequence <= 9)
-            {
-                MaxHP += 6;
-                MaxSHP += 2;
-                MaxSpirituality += 2;
-                Movement += 1;
-                Autopsy += 1;
-
-                ActiveAbilities.Add(new PathwayAbility("Cold/Decay/Corrosion Resistance (Passive)", "Gain +4 damage reduction to cold, decay, and corrosion."));
-
-                ActiveAbilities.Add(new PathwayAbility("Knowledge (Undead) (Passive)",
-                    "Expert on autopsy and weaknesses of Undead creatures/corpses. Roll: 10+Seq+Autopsy.\n" +
-                    "• DC 10: Find out meager reasons of death.\n" +
-                    "• DC 15: Find out deeper reasons of death.\n" +
-                    "• DC 20: Find out most death reasons."));
-
-                ActiveAbilities.Add(new PathwayAbility("Gloomy Presence (Passive)", "Lower body temperature and gloomy presence prevents attacks from Undead creatures and Spirits."));
-
-                ActiveAbilities.Add(new PathwayAbility("Spirit Vision", "Directly see spiritual bodies (including evil spirits and restless wraiths) without activating it. See parts of a soul, deduce health/emotions, and determine magical auras."));
-            }
-            if (CurrentSequence <= 8)
-            {
-                MaxHP += 8;
-                MaxSHP += 3;
-                MaxSpirituality += 2;
-                Movement += 3;
-                AC += 2;
-                Intimidation += 2;
-
-                ActiveAbilities.Add(new PathwayAbility("Spirit Communication (Extra)",
-                    "Communicate with nearby Spirits to scout or carry out tasks. Roll: 10+Seq+Intimidation.\n" +
-                    "• DC 10: Command lesser spirits.\n" +
-                    "• DC 15: Command somewhat stronger spirits.\n" +
-                    "• DC 20: Command more mystical spirits.\n" +
-                    "• Combat: Command spirits to immobilize (10+Seq+Intimidation to hit). If hit, target loses 1 Extra Action."));
-
-                ActiveAbilities.Add(new PathwayAbility("Eye of Death (Extra)", "Cost: 2 Spirit (Start of turn). Eyes turn colourless to quickly determine weaknesses. Gain +3 to hit and +3 dmg towards Undead and Spirit Creatures."));
-            }
-            if (CurrentSequence <= 7)
-            {
-                MaxHP += 10;
-                MaxSHP += 2;
-                MaxSpirituality += 2;
-                Movement += 1;
-                AC += 1;
-                Autopsy += 2;
-                Intimidation += 1;
-
-                ActiveAbilities.Add(new PathwayAbility("Spirit Channelling (Ritual)", "Roll: 10+Seq+Intimidation. Perform seances (requires materials like Moon Oil or blood) to command spirits up to Seq 6. Fails if you take >10 damage. Limited to 1 Spirit per seance."));
-
-                ActiveAbilities.Add(new PathwayAbility("Knowledge (Mysticism)",
-                    "Roll: 10+Seq+Autopsy. Gain info from spirits/living beings (Living target requires extracts and incurs -2 penalty).\n" +
-                    "• DC 10: Rough image/location.\n" +
-                    "• DC 15: General outline of area.\n" +
-                    "• DC 20: Block the target is at.\n" +
-                    "• DC 25: Street the target is at.\n" +
-                    "• DC 30: House complex target is at.\n" +
-                    "• Nat 20: Exact location.\n" +
-                    "You also take -4 dmg from beyonder abilities while they are in your mind."));
-
-                ActiveAbilities.Add(new PathwayAbility("Zombie Disguise (Extra)", "Cost: 2 Spirit (Start of turn). Disguise as a Zombie. Take -6 dmg from Decay, Cold, Death, and similar auras."));
-
-                ActiveAbilities.Add(new PathwayAbility("Danger Intuition (Reactionary)",
-                    "Roll: 10+Seq+Autopsy. Sense impending danger before it happens.\n" +
-                    "• DC 10: Know 1 Extra Action (+1 AC against it).\n" +
-                    "• DC 15: Know both Extra Actions (+1 AC against them).\n" +
-                    "• DC 20: Know the Main Action (+1 AC against it).\n" +
-                    "• DC 25: Know the Main & 1 Extra Action (+1 AC against them).\n" +
-                    "• DC 30: Know Main or Extra Action halfway accurately (+2 AC)."));
-
-                AddOrUpgradeAbility("Spirit Communication", "Advanced Spirit Communication (Extra)", "Directly communicate with natural spirits and loitering dead souls around you, acting as informants. Can directly communicate with recently deceased enemies (+2 to check) to get information.");
-                AddOrUpgradeAbility("Eye of Death", "Advanced Eye of Death (Extra)", "Cost: 2 Spirit (Start of turn). Bonus increases to +5 to hit and +6 to damage against Undead and Spirit Creatures.");
-            }
-            if (CurrentSequence <= 6)
-            {
-                MaxHP += 8;
-                MaxSHP += 3;
-                MaxSpirituality += 3;
-                Movement += 2;
-                AC += 2;
-                Autopsy += 2;
-                Intimidation += 2;
-
-                ActiveAbilities.Add(new PathwayAbility("Lethal Strike (Passive)", "Gain +3 base damage."));
-
-                ActiveAbilities.Add(new PathwayAbility("Necromancy (Ritual)",
-                    "Cost: 4 Spirit. Roll: 10+Seq+Autopsy. Reanimate corpses into skeletons/zombies without will/vitality. Fails if you take >10 damage.\n" +
-                    "• DC 10: 25% original stats/HP.\n" +
-                    "• DC 15: 40% original stats/HP.\n" +
-                    "• DC 20: 60% original stats/HP.\n" +
-                    "• DC 25: 80% original stats/HP.\n" +
-                    "• DC 30: 100% original stats/HP."));
-
-                ActiveAbilities.Add(new PathwayAbility("Spirit World Communication (Extra)",
-                    "Cost: 4 Spirit. Roll: 10+Seq+Intimidation. Recruit Spirit messengers for help delivering/receiving messages.\n" +
-                    "• DC 20: Convince Seq 8 & below.\n" +
-                    "• DC 25: Convince Seq 7 & below.\n" +
-                    "• DC 30: Convince Seq 6 & below.\n" +
-                    "• DC 35: Convince Seq 5 & below."));
-
-                ActiveAbilities.Add(new PathwayAbility("Language of the Dead (Extra)", "Cost: 3 Spirit. Roll: 10+Seq+Intimidation (DC +5 for every sequence higher than you). Speak a mystical language urging a target's Spirit to leave their body. Target is left vulnerable, guaranteeing 2 hits."));
-            }
-            if (CurrentSequence <= 5)
-            {
-                MaxHP += 10;
-                MaxSHP += 3;
-                MaxSpirituality += 3;
-                Movement += 3;
-                AC += 2;
-                Autopsy += 2;
-                Intimidation += 2;
-
-                ActiveAbilities.Add(new PathwayAbility("Freezing Immunity (Passive)", "Total immunity to freezing."));
-
-                ActiveAbilities.Add(new PathwayAbility("Spiritual Perception (Passive)", "Roll: 10+Seq+Autopsy vs Target Stealth. Acutely sense if an unknown creature is crossing the Spirit World near you."));
-
-                ActiveAbilities.Add(new PathwayAbility("Internal Underworld (Passive)", "House numerous souls and natural spirits in a prison within your body. Gain +1 Extra Action solely for commanding spirits for every 2 Spirits housed. Grants unique abilities based on housed spirits. (Prime target for Evil Spirit possession)."));
-
-                ActiveAbilities.Add(new PathwayAbility("Door to the Underworld",
-                    "Sense/Create gates to the Underworld. Control dead spirits inside (+2 to spirit manipulation checks).\n" +
-                    "• Vacuum Pull (Main): d20+Seq+Intimidation vs target Move. Fail = banished to random Spirit World location.\n" +
-                    "• Underworld Grasp (Extra): d20+Seq+Intimidation. Bloody arms/tentacles entangle target, reducing Movement by 6.\n" +
-                    "• Fog Absorption (Main): d20+Seq+Intimidation to remove airborne poisons/Fog of War (DC10 = equal seq, DC15 = +1 seq, DC20 = +2 seq)."));
-            }
-            if (CurrentSequence <= 4)
-            {
-                MaxHP *= 2;
-                MaxSHP *= 2;
-                MaxSpirituality *= 2;
-                Movement += 1;
-                AC += 2;
-                Autopsy += 3;
-                Intimidation += 3;
-
-                ActiveAbilities.Add(new PathwayAbility("Underworld Authority (Passive)", "All checks regarding undead and spirits enjoy a +4 bonus."));
-
-                ActiveAbilities.Add(new PathwayAbility("Sealing (Extra)",
-                    "Roll: 10+Seq+Autopsy. Form a Seal to reduce negative effects of a Sealed Artifact via the Underworld.\n" +
-                    "• DC 20: 50% reduced negatives.\n" +
-                    "• DC 25: 75% reduced negatives.\n" +
-                    "• DC 30: 90% reduced negatives."));
-
-                ActiveAbilities.Add(new PathwayAbility("Spirit World Traversal (Extra)",
-                    "Roll: 10+Seq+Intimidation. Traverse the Spirit World for long distances (Cannot Blink short distances).\n" +
-                    "• DC 10: 3500 km.\n" +
-                    "• DC 15: 4000 km.\n" +
-                    "• DC 20: 4500 km.\n" +
-                    "• DC 25: 4800 km."));
-
-                ActiveAbilities.Add(new PathwayAbility("Rotting Wind (Extra)", "Roll: 10+Seq+Intimidation. Gust of cold wind silently inflicts 10 stacks of corrosion and 10 stacks of freezing per turn."));
-
-                ActiveAbilities.Add(new PathwayAbility("Resurrection (Passive)", "Every 60 years or upon death, resurrect with wiped memories and reset madness. Can resurrect 20 times before your soul inevitably gets pulled into the River of Eternal Darkness."));
-
-                ActiveAbilities.Add(new PathwayAbility("Spirit Body (Reactionary)", "Exist between a physical body and a Spirit Body. Physical attacks become ineffective."));
-
-                ActiveAbilities.Add(new PathwayAbility("Physical Enhancement (Passive)", "Physical attacks are no longer fatal unless body is completely destroyed. Cannot be pushed below 1 HP by physical attacks unless they deal more than half your Max HP."));
-
-                AddOrUpgradeAbility("Language of the Dead", "Language of the Dead Spell System", "Evolves into a Spell System related to Death, Spirits, Living Corpses, Withering, and Enslavement (Spells require DM approval).");
-
-                AddOrUpgradeAbility("Door to the Underworld", "Advanced Door to the Underworld",
-                    "Cost: 4 Spirit/turn. Form a favorable battlefield inflicting attraction, summoning, and ravings.\n" +
-                    "• Debuffs enemies in area: -4 Move, -2 AC, 2 Corrosion per turn.\n" +
-                    "• Summoning: Roll d100 each turn to summon Undead.\n" +
-                    "  [1-25] 3 Seq6 Spirits | [26-50] 2 Seq5 Spirits | [51-75] 3 Seq5 Spirits\n" +
-                    "  [76-90] 2 Seq4 Spirits | [91-95] 1 Styx Servant | [96-100] 2 Styx Servants.");
-            }
-        }
-
-        private void ApplyTwilightGiantPathway()
-        {
-            if (CurrentSequence <= 9)
-            {
-                MaxHP += 8;
-                MaxSHP += 2;
-                MaxSpirituality += 1;
-                Movement += 2;
-                AC += 1;
-                Melee += 1;
-
-                ActiveAbilities.Add(new PathwayAbility("Combat Buffs (Passive)", "Gain +3 dmg and +2 to hitting."));
-
-                ActiveAbilities.Add(new PathwayAbility("Combat Proficiency",
-                    "Warriors will become proficient in the 2 fields of combat upon entering this Sequence: equipment utilization and martial arts.\n" +
-                    "They are proficient over various kinds of weaponry and armor to the point that they can use weapons and armor that most ordinary folk are unable to utilize\n" +
-                    "Armors have the melee stat added to hp(the weapons are already being boosted by melee) in their hands\n" +
-                    "They have a mastery of various martial arts. With their enhanced physique and affinity towards fighting, there are no fighting styles impossible to master\n" +
-                    "They can learn martial arts twice as fast (1.5x the roll)\n" +
-                    "They can perform very basic ritualistic magic"));
-            }
-            if (CurrentSequence <= 8)
-            {
-                MaxHP += 10;
-                MaxSHP += 3;
-                MaxSpirituality += 1;
-                Movement += 1;
-                AC += 1;
-                Melee += 2;
-
-                AddOrUpgradeAbility("Combat Buffs", "Combat Buffs (Passive)", "Gain an additional +2 dmg and +1 to hitting.");
-
-                ActiveAbilities.Add(new PathwayAbility("Supernatural Resistance (Passive)",
-                    "Their body's superb physique and defensive capabilities can reduce the negative effects of certain supernatural powers.\n" +
-                    "Unlike other Sequence 8's, Supernatural Resistance is their only extraordinary ability.\n" +
-                    "Sequence 9-7 Powers get reduced by: Melee x 2\n" +
-                    "Sequence 6-5 Powers get reduced by: Melee+3\n" +
-                    "They can momentarily touch non-physical (incorporeal) existences with this ability. (Extra)\n" +
-                    "They can slightly sense supernatural activities at work if they are attentive.\n" +
-                    "10+seq+melee as their discerning check for stealth"));
-
-                AddOrUpgradeAbility("Combat Profiency","Combat Proficiency",
-                    "They are gifted with the ability and talent to become experts of combat that specialize in close quarters battles.\n" +
-                    "However, just like the Combat Proficiency of a Warrior, a Pugilist requires training time and combat experience to reach the expert level of close combat.\n" +
-                    "2x martial arts learning now");
-            }
-            if (CurrentSequence <= 7)
-            {
-                MaxHP += 16;
-                MaxSHP += 3;
-                MaxSpirituality += 1;
-                Movement += 3;
-                AC += 2;
-                Melee += 1;
-
-                AddOrUpgradeAbility("Combat Buffs", "Combat Buffs (Passive)", "Gain an additional +3 dmg and +2 to hitting.");
-
-                ActiveAbilities.Add(new PathwayAbility("Weapon Mastery",
-                    "As long as it can be used as a \"weapon\" in the Weapon Master's hands, it can be used in tandem with their Physical Enhancement to instantly grant them a grandmaster's level of familiarity and effectiveness when using that \"weapon\" in combat.\n" +
-                    "This includes but is not limited to their body, Beyonder weapons, any forms of swords, firearms, other types of weaponry, etc, Mystical Items or Sealed Artifacts\n" +
-                    "The melee stat now gets added to hit with all weapons, Mystical Items and Sealed artifacts effects will be reduced by the DM.\n" +
-                    "They can conduct advanced ritualistic magic and use spirit vision"));
-            }
-            if (CurrentSequence <= 6)
-            {
-                MaxHP += 15;
-                MaxSHP += 4;
-                MaxSpirituality += 3;
-                Movement += 2;
-                AC += 1;
-                Melee += 2;
-
-                AddOrUpgradeAbility("Combat Buffs", "Combat Buffs (Passive)", "Gain an additional +3 dmg and +2 to hitting.");
-
-                ActiveAbilities.Add(new PathwayAbility("Giant's Physique (Strength of Giants)",
-                    "Upon drinking this Sequence 6 potion, a Dawn Paladin will possess the body and strength akin to that of common Giants.\n" +
-                    "By now, their bodies are muscular, well attuned to combat and their height is further increased.\n" +
-                    "x1.25 taller\n" +
-                    "Aside from them becoming taller, Dawn Paladins can further temporarily increase their height. (Extra)\n" +
-                    "x1.5 taller for 2 turns resulting in +2 dmg and +5 HP\n" +
-                    "Costs 1 Spirituality at the start of one's turn"));
-
-                ActiveAbilities.Add(new PathwayAbility("Light of Dawn (Sunrise Gleam) (Extra)",
-                    "Centered on oneself, they can bask a radius of up to 40 to 50 meters in the bright Dawn rays that dispel Illusions, Exorcise and even weaken Evil Spirits\n" +
-                    "It can dispel powers (negative energies) of Evil, Corruption, and Degeneration, but in the Domain of the Holy and Light, the Light of Dawn is still inferior to a Light Supplicant powers\n" +
-                    "A Light of Dawn can erase Shadows and nullify Concealment effects, such as Witches' Invisibility. For Wraiths and Shadow Ascetics, their peculiarities are diminished\n" +
-                    "10+seq+melee\n" +
-                    "If the Ac is hit normal spirits that are not beyonder forms get immediately exorcised, evil spirits get -25% to their stats"));
-
-                ActiveAbilities.Add(new PathwayAbility("Dawn Armor (Extra)",
-                    "They can conjure a silver Armor of Dawn around their bodies which would be equivalent to specially forged full-body armor that doesn’t weigh anything or inhibit their motion in any way.\n" +
-                    "It can recover from damage, but their stamina will automatically be drained during the process\n" +
-                    "A Dawn Paladin's Dawn Armor includes gauntlets, breastplates, and a helmet.\n" +
-                    "creates an armor with 20+Melee HP\n" +
-                    "Upon it breaking, reduce the armor's HP by 3 and regenerate armor next turn.\n" +
-                    "Costs 4 Spirituality to cast and 1 at the start of ones turn as it is upheld."));
-
-                ActiveAbilities.Add(new PathwayAbility("Dawn Weaponry (Extra)",
-                    "They can use the Dawn to materialize different kinds of weapons, such as a massive two-handed axe, a disposable arm-thick spear, or their strongest weapon the Sword of Dawn.\n" +
-                    "Each weapon deals their normal dmg with an added 2d4 and the dmg gets doubled on Evil Spirits or the Corrupted.\n" +
-                    "Costs 4 Spirituality to cast and 1 at the start of ones turn as it is upheld."));
-
-                ActiveAbilities.Add(new PathwayAbility("Sword of Dawn & Hurricane of Light (Main)",
-                    "Sword of Dawn: A Dawn light emitting, two-handed broadsword, greatsword, or dagger that is solid and sharp. Each strike from it is imbued with a Purification effect and it is the medium that allows a Dawn Paladin to use their strongest attack - the Hurricane of Light.\n" +
-                    "Hurricane of Light(Main): This is the strongest attack of a Dawn Paladin whose full power is only usable with the Sword of Dawn. They can release rays of light from their Sword of Dawn that quickly transforms into a Dawn Hurricane; it can directly destroy a person's body, eliminate Wraiths, and even heavily wound Evil Spirits. It possesses a unique strength that can more easily destroy creatures of the Evil and Undead Domain\n" +
-                    "10+seq+melee\n" +
-                    "Auto Hits within 10 Meters\n" +
-                    "deals 10d5+melee dmg\n" +
-                    "Costs 6 Spirituality.\n" +
-                    "This attack is so powerful that some Dawn Paladins have difficulty controlling it to prevent implicating their allies. In addition, a Dawn Paladin would need at least more than 2 minutes of recovery before they can form another Hurricane of Light\n" +
-                    "4 turn cooldown\n" +
-                    "Evil creatures like Devils or Zombies would be subjected to the effects of Purification and the damage of a Fragmentary Blade. The combination of these aspects causes their Hurricane of Light to become excellent at purging Evil.\n" +
-                    "1.5x dmg\n" +
-                    "Purification weakens defense and inflicts harm on the Evil creature's spirit and flesh, while the Fragmentary Blade utilizes Purification to weaken defense and cut flesh. The more wounds and the deeper they were, the better the Purification effect.\n" +
-                    "Hurricane of Light would be even more effective on Spirits (such as a Wraiths) leaving the target close to death\n" +
-                    "2x dmg"));
-            }
-            if (CurrentSequence <= 5)
-            {
-                MaxHP += 15;
-                MaxSHP += 3;
-                MaxSpirituality += 3;
-                Movement += 2;
-                AC += 2;
-                Melee += 3;
-
-                AddOrUpgradeAbility("Combat Buffs", "Combat Buffs (Passive)", "Gain an additional +4 dmg, +2 to hitting, and +5 dmg reduction.");
-
-                ActiveAbilities.Add(new PathwayAbility("Protection (Extra)",
-                    "For defense in an area. They can enter a defensive state by stabbing their Sword of Dawn into the ground, releasing Dawn-like light that blooms into illusory walls. This creates an invisible barrier that can defend not only themselves but also their comrades within a limited range.\n" +
-                    "Protection can isolate certain supernatural powers, preventing them from getting inside the barrier. This state leaves them passive and unable to attack, when they attack, their corresponding defense will decrease significantly, but it will still be stronger than full-body armor.\n" +
-                    "Few can break through their defenses below that of the High-Sequences, regardless of the types of damage they can inflict and their corresponding effects.\n" +
-                    "Both Protection and Dawn Armor can be used simultaneously.\n" +
-                    "Reapers are one of the few non High-Sequence Beyonders that can penetrate a Guardian's defenses (Protection).\n" +
-                    "While this is active all allies and they will get a 60+Melee HP shield but the TG can not move or attack unless he weakens the shield to half HP\n" +
-                    "The outside barrier always has 70HP only the person barrier may vary"));
-
-                AddOrUpgradeAbility("Supernatural Resistance", "Supernatural Resistance (Passive)",
-                    "They are unable to be confused or misdirected by Illusions.\n" +
-                    "Illusions are ineffective unless the person completely outscales them in status");
-
-                ActiveAbilities.Add(new PathwayAbility("Spirituality (Passive)",
-                    "Their Spirituality enhances to a degree to fortify their Cogitation.\n" +
-                    "-2 SHP dmg taken"));
-            }
-            if (CurrentSequence <= 4)
-            {
-                MaxHP *= 3;
-                MaxSHP *= 2;
-                MaxSpirituality *= 2;
-                Movement += 3;
-                AC += 2;
-                Melee += 4;
-
-                AddOrUpgradeAbility("Combat Buffs", "Combat Buffs (Passive)", "Gain an additional +5 dmg and +4 to hitting.");
-
-                ActiveAbilities.Add(new PathwayAbility("Eye of Demon Hunting (Passive)",
-                    "Demon Hunters can make complex dark green symbols appear in their eyes, allowing them to identify targets' characteristics, weaknesses, and current status.\n" +
-                    "They become sensitive to any traces of Evil, Degeneration, and Corruption. They can also rely on their sixth sense, Spiritual Intuition, and life experiences to judge the situation.\n" +
-                    "Veteran Demon Hunters can use the Eye of Demon Hunting to judge whether a target is lying.\n" +
-                    "This isn't just a Beyonder power enhancing their perception, but a generalized term to describe a Demon Hunter's terrifying prowess in observation and judgement.\n" +
-                    "This makes Demon Hunters good at discovering the weaknesses of different enemies.\n" +
-                    "10+seq+melee (Extra) Needs to be rolled before hit\n" +
-                    "dc25: They discover weaknesses → next attack deals 1.2x dmg\n" +
-                    "dc30: They discover a greater weakness → next attack deals 1.5x dmg\n" +
-                    "dc35: They discover a very important weakness → 1.75x dmg for the next attack"));
-
-                ActiveAbilities.Add(new PathwayAbility("Alchemy",
-                    "Every Demon Hunter is an expert at making supernatural medicines. They can enter a unique Cogitation state to create concoctions corresponding to their enemies' weakness.\n" +
-                    "Demon Hunters innately possess knowledge on the efficient utilization of different monster parts and herbs. By utilizing different combinations, they can create powerful ointments, holy paste, mystic smears, glyphs, and herbal potions or drugs with many effects.\n" +
-                    "They can rely on these mixtures to obtain Beyonder effects of different kinds that can be used as a coating on weapons. This allows Demon Hunters to take advantage of their target's weakness with pinpoint accuracy and achieve effective targeted suppression.\n" +
-                    "Some effects include Lightning Strike, Freeze, Purification, Burning, Decay, and Exorcism.\n" +
-                    "Requires one Extra to apply the coating.\n" +
-                    "10+seq+melee Requires one Main and the needed ingredients to create the coatings while in combat.\n" +
-                    "Lightning Strike: dc20: 5d5 dmg + 10 charge\n" +
-                    "Freeze: dc25: 5d5 dmg + 10 freezing\n" +
-                    "Purification: dc30: 5d5 dmg, 3x against spirits as well as +20 burn\n" +
-                    "Burning: dc35: 5d5 dmg +30 burning stacks\n" +
-                    "Decay: dc35: 15 corrosion stacks and -5 to movement and hitting\n" +
-                    "Exorcism: dc35: One shots spirits below seq4 and deals 50% max HP dmg against those at seq4"));
-
-                ActiveAbilities.Add(new PathwayAbility("Mind Concealment (Passive)",
-                    "Demon Hunters are able to Conceal their desires and intentions, preventing others from reading their actions and guiding their thoughts down an ordered path.\n" +
-                    "This effectively makes them the nemesis of Devils, Desire Apostles and Demons; as well as helps interfere with any form of Divination and Prophecy.\n" +
-                    "divination and prophecy will require +15+Melee dc against them\n" +
-                    "desire apostles can’t foresee their danger"));
-
-                ActiveAbilities.Add(new PathwayAbility("Tracking",
-                    "They are good at tracking targets across various landscapes.\n" +
-                    "10+seq+melee+2 for tracking (Extra)\n" +
-                    "dc20: They find a trail of their target in 10km radius\n" +
-                    "dc25: they find a very accurate trail in 100km radius\n" +
-                    "dc30: They find a perfect trail in 300km radius"));
-
-                AddOrUpgradeAbility("Spirituality", "Spirituality",
-                    "A Demon Hunter's Spirituality will be enhanced significantly.\n" +
-                    "They will possess a strong Spiritual Intuition\n" +
-                    "10+seq+melee (Extra)\n" +
-                    "dc10: Know the extra action the enemy will take roughly (+2AC against that)\n" +
-                    "dc15: Know both the extra actions the enemy will take roughly (+3 AC against them)\n" +
-                    "dc20: Know the main action the enemy will take roughly (+4 AC against that)\n" +
-                    "dc25: Know the main and one extra action roughly (+5AC)\n" +
-                    "dc30: Know the main action or an extra action halfway accurately (+6AC)");
-            }
-        }
-
-        public class PathwayAbility
-        {
-            public string Name { get; set; }
-            public string Description { get; set; }
-
-            public PathwayAbility() { }
-
-            public PathwayAbility(string name, string description)
-            {
-                Name = name;
-                Description = description;
             }
         }
     }

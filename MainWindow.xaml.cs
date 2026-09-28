@@ -72,6 +72,7 @@ namespace TTRPGhelper
                 myCharacter.ImagePath = openFileDialog.FileName;
             }
         }
+
         private void Save_Click(object sender, RoutedEventArgs e)
         {
             try
